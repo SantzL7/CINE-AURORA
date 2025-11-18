@@ -1,0 +1,13 @@
+/* src/components/Row.css */
+.row { margin: 18px 0; }
+.row__title { margin: 0 0 8px 6px; font-size: 18px; }
+.row__scroller {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 6px;
+  scroll-snap-type: x proximity;
+}
+.row__scroller::-webkit-scrollbar { height: 8px; }
+.row__scroller::-webkit-scrollbar-thumb { background: #2f2f2f; border-radius: 8px; }
+.row__loading, .row__empty { color: var(--muted); padding: 8px; }
