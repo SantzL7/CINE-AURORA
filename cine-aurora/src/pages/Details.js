@@ -93,24 +93,84 @@ export default function Details() {
             </div>
             <div className="details__info">
               <h1 className="details__title">{movie.title}</h1>
-              <div className="details__meta">
-                {movie.year && <span>{movie.year}</span>}
-                {movie.type && <span>{movie.type === "series" ? "Série" : "Filme"}</span>}
-                {movie.genre && <span>{movie.genre}</span>}
+              <div className="details__meta" style={{ margin: '12px 0', display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
+                {movie.year && (
+                  <span style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    padding: '4px 8px',
+                    borderRadius: '4px',
+                    fontSize: '0.9em'
+                  }}>
+                    {movie.year}
+                  </span>
+                )}
+                {movie.type && (
+                  <span style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    padding: '4px 8px',
+                    borderRadius: '4px',
+                    fontSize: '0.9em',
+                    textTransform: 'capitalize'
+                  }}>
+                    {movie.type === "series" ? "Série" : "Filme"}
+                  </span>
+                )}
+                {movie.genre && (
+                  <span style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    padding: '4px 8px',
+                    borderRadius: '4px',
+                    fontSize: '0.9em',
+                    textTransform: 'capitalize'
+                  }}>
+                    {movie.genre}
+                  </span>
+                )}
               </div>
-              <p className="details__desc">{movie.description}</p>
-              <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
-                <button className="btn primary" onClick={() => navigate(`/watch/${movie.id}`)}>
-                  Assistir
+              {movie.description && (
+                <p className="details__desc" style={{ 
+                  lineHeight: '1.6',
+                  marginBottom: '24px',
+                  maxWidth: '800px',
+                  color: 'rgba(255, 255, 255, 0.8)'
+                }}>
+                  {movie.description}
+                </p>
+              )}
+              <div style={{ 
+                display: "flex", 
+                gap: "12px", 
+                marginTop: "24px",
+                flexWrap: 'wrap'
+              }}>
+                <button 
+                  className="btn primary" 
+                  onClick={() => navigate(`/watch/${movie.id}`)}
+                  style={{
+                    padding: '10px 24px',
+                    fontSize: '1rem',
+                    fontWeight: '600'
+                  }}
+                >
+                  ▶ Assistir
                 </button>
                 {currentUser && (
-                  <button className="btn" type="button" onClick={toggleWatchlist} disabled={listLoading}>
-                    {inList ? "Remover da minha lista" : "Adicionar à minha lista"}
+                  <button 
+                    className="btn" 
+                    type="button" 
+                    onClick={toggleWatchlist} 
+                    disabled={listLoading}
+                    style={{
+                      padding: '10px 16px',
+                      fontSize: '1rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    {inList ? '✓ Na sua lista' : '+ Minha lista'}
                   </button>
                 )}
-                <button className="btn ghost" onClick={() => navigate("/app")}>
-                  Voltar ao catálogo
-                </button>
               </div>
             </div>
           </div>
