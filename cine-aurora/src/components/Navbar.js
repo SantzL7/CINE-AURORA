@@ -1,9 +1,20 @@
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function Navbar() {
-  const { logout } = useAuth();
+  const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { currentUser, logout } = useAuth();
+
+  useEffect(() => {
+    function onScroll() {
+      setScrolled(window.scrollY > 10);
+    }
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   async function handleLogout() {
     try {
@@ -15,24 +26,62 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="navbar">
-      <div className="navbar__brand">
-        <div className="brand-mark" />
-        <div className="brand-text">
-          <span className="brand-title">Cine Aurora</span>
-          <span className="brand-subtitle">Northern Lights Cinema</span>
-        </div>
+    <header className={`navbar${scrolled ? " navbar--scrolled" : ""}`}>
+      <div className="navbar__brand" onClick={() => navigate("/app")} style={{ cursor: "pointer", display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <img 
+          src="/logo192.png" 
+          alt="Logo CineAurora" 
+          style={{ height: '40px', width: 'auto' }}
+        />
+        <span style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>CineAurora</span>
       </div>
-      <div className="navbar__nav">
-        <button className="navbar__link" onClick={() => navigate("/app")}>Início</button>
-        <button className="navbar__link" onClick={() => navigate("/app")}>
-          Catálogo
+
+      <nav className="navbar__nav">
+        <button
+          className={`navbar__link${location.pathname === "/app" ? " navbar__link--active" : ""}`}
+          onClick={() => navigate("/app")}
+        >
+          Home
         </button>
-        <button className="navbar__link" onClick={() => navigate("/admin")}>
-          Admin
+        <button
+          className={`navbar__link${location.pathname === "/app" ? "" : ""}`}
+          onClick={() => navigate("/app")}
+        >
+          Filmes
         </button>
+        <button
+          className={`navbar__link${location.pathname === "/app" ? "" : ""}`}
+          onClick={() => navigate("/app")}
+        >
+          Séries
+        </button>
+        <button
+          className={`navbar__link${location.pathname === "/my-list" ? " navbar__link--active" : ""}`}
+          onClick={() => navigate("/my-list")}
+        >
+          Minha lista
+        </button>
+      </nav>
+
+      <div className="navbar__right">
+        {currentUser?.email === "matheus0mendes0marinho@gmail.com" && (
+          <button
+            className="btn"
+            type="button"
+            onClick={() => navigate("/admin")}
+          >
+            Admin
+          </button>
+        )}
+        <button
+          className="navbar__icon"
+          aria-label="Buscar"
+          onClick={() => navigate("/search")}
+        >
+          🔍
+        </button>
+        <button className="btn" onClick={handleLogout}>Sair</button>
       </div>
-      <button className="btn" onClick={handleLogout}>Sair</button>
-    </nav>
+    </header>
   );
 }

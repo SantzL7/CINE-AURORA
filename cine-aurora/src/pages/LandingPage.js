@@ -28,10 +28,10 @@ export default function LandingPage() {
           }}
         >
           <div>
-            <h1 style={{ fontSize: 42, margin: "0 0 12px" }}>Filmes, series e muito mais sob a luz da Aurora.</h1>
+            <h1 style={{ fontSize: 42, margin: "0 0 12px" }}>Filmes, series e muito mais sob a luz da Aurora.</h1>
             <p className="muted" style={{ maxWidth: 520, margin: "0 0 20px" }}>
-              Um ambiente de streaming inspirado na aurora boreal para voce apresentar e destacar o seu catalogo de
-              filmes e series com uma experiencia imersiva.
+              Um ambiente de streaming inspirado na aurora boreal para voce apresentar e destacar o seu catalogo de
+              filmes e series com uma experiencia imersiva.
             </p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 12 }}>
               <button className="btn primary" onClick={() => navigate("/login")}>
@@ -42,7 +42,7 @@ export default function LandingPage() {
               </button>
             </div>
             <p className="muted" style={{ fontSize: 13 }}>
-              Acesse o painel administrador, cadastre titulos e veja tudo como se fosse um servico de streaming
+              Acesse o painel administrador, cadastre titulos e veja tudo como se fosse um servico de streaming
               profissional.
             </p>
           </div>

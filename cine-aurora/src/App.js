@@ -5,6 +5,10 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Player from "./pages/Player";
 import Admin from "./pages/Admin";
+import SeriesEpisodes from "./pages/SeriesEpisodes";
+import Details from "./pages/Details";
+import MyList from "./pages/MyList";
+import Search from "./pages/Search";
 import LandingPage from "./pages/LandingPage";
 
 function App() {
@@ -31,10 +35,42 @@ function App() {
             }
           />
           <Route
+            path="/admin/series/:id/episodes"
+            element={
+              <AdminRoute>
+                <SeriesEpisodes />
+              </AdminRoute>
+            }
+          />
+          <Route
             path="/watch/:id"
             element={
               <ProtectedRoute>
                 <Player />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/title/:id"
+            element={
+              <ProtectedRoute>
+                <Details />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my-list"
+            element={
+              <ProtectedRoute>
+                <MyList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/search"
+            element={
+              <ProtectedRoute>
+                <Search />
               </ProtectedRoute>
             }
           />
