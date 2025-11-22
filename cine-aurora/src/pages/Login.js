@@ -19,7 +19,12 @@ export default function Login() {
       } else {
         await signup(email, password);
       }
-      navigate("/", { replace: true });
+      const adminEmail = "matheus0mendes0marinho@gmail.com";
+      if (email === adminEmail) {
+        navigate("/admin", { replace: true });
+      } else {
+        navigate("/app", { replace: true });
+      }
     } catch (error) {
       setErr(error.message);
     }

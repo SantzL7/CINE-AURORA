@@ -4,7 +4,7 @@ import { collection, getDocs, query, where } from "firebase/firestore";
 import Card from "./Card";
 import "./Row.css";
 
-export default function Row({ title, genre }) {
+export default function Row({ title, genre, locked = false }) {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -32,7 +32,7 @@ export default function Row({ title, genre }) {
         {loading && <div className="row__loading">Carregando...</div>}
         {!loading && movies.length === 0 && <div className="row__empty">Sem títulos</div>}
         {movies.map((m) => (
-          <Card key={m.id} movie={m} />
+          <Card key={m.id} movie={m} locked={locked} />
         ))}
       </div>
     </section>
