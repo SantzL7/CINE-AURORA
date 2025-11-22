@@ -55,24 +55,106 @@ export default function Player() {
   if (!movie) return <div className="player__loading">Carregando...</div>;
 
   return (
-    <>
+    <div style={{
+      backgroundColor: '#0f0f0f',
+      minHeight: '100vh',
+      color: '#fff'
+    }}>
       <Navbar />
-      <main className="player-page-main">
-        <div className="player">
-          <button className="btn ghost" onClick={() => navigate(-1)}>
-            Voltar
-          </button>
-          <h2 className="player__title">{movie.title}</h2>
-          <video
-            ref={videoRef}
-            className="player__video"
-            src={movie.videoUrl}
-            controls
-            autoPlay
-          />
-          <p className="player__desc">{movie.description}</p>
+      <main style={{
+        padding: '20px 5%',
+        maxWidth: '1400px',
+        margin: '0 auto',
+        paddingTop: '80px'
+      }}>
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '20px'
+        }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '20px'
+          }}>
+            <button 
+              onClick={() => navigate(-1)}
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                border: 'none',
+                color: '#fff',
+                padding: '10px 20px',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '1rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseOver={(e) => {
+                e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+              }}
+              onMouseOut={(e) => {
+                e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+              }}
+            >
+              ← Voltar
+            </button>
+          </div>
+          
+          <div style={{
+            width: '100%',
+            aspectRatio: '16/9',
+            backgroundColor: '#000',
+            borderRadius: '8px',
+            overflow: 'hidden',
+            marginBottom: '20px'
+          }}>
+            <video
+              ref={videoRef}
+              src={movie.videoUrl}
+              controls
+              autoPlay
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                outline: 'none'
+              }}
+            />
+          </div>
+
+          <div style={{
+            padding: '0 20px',
+            maxWidth: '1000px',
+            margin: '0 auto',
+            textAlign: 'center'
+          }}>
+            <h1 style={{
+              fontSize: '2.2rem',
+              margin: '0 0 20px 0',
+              fontWeight: '700',
+              color: '#fff'
+            }}>
+              {movie.title}
+            </h1>
+            
+            {movie.description && (
+              <p style={{
+                fontSize: '1.1rem',
+                lineHeight: '1.7',
+                color: 'rgba(255, 255, 255, 0.85)',
+                margin: '0 auto',
+                maxWidth: '800px'
+              }}>
+                {movie.description}
+              </p>
+            )}
+          </div>
         </div>
       </main>
-    </>
+    </div>
   );
 }
