@@ -1,76 +1,146 @@
-import { useEffect, useState, useRef } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useEffect, useState, useRef, useCallback } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { doc, getDoc, setDoc, collection, query, orderBy, getDocs } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
 
 export default function Player() {
+  // Hooks de estado
   const { id, type = 'movie' } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
   const [media, setMedia] = useState(null);
   const { currentUser } = useAuth();
   const videoRef = useRef(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    async function load() {
-      if (!id) return;
-      
-      try {
-        // Determina a coleção com base no tipo (filme ou série)
-        const collectionName = type === 'series' ? 'series' : 'movies';
-        const ref = doc(db, collectionName, id);
-        const snap = await getDoc(ref);
-        
-        if (snap.exists()) {
-          setMedia({ 
-            id: snap.id, 
-            type: type,
-            ...snap.data() 
-          });
-        } else {
-          console.error('Mídia não encontrada:', { id, type });
-          navigate("/app", { replace: true });
-        }
-      } catch (error) {
-        console.error('Erro ao carregar mídia:', error);
-        navigate("/app", { replace: true });
-      }
-    }
+  // Carrega os dados da mídia
+  const loadMedia = useCallback(async () => {
+    if (!id) return;
     
-    load();
+    try {
+      const collectionName = type === 'series' ? 'series' : 'movies';
+      const ref = doc(db, collectionName, id);
+      const snap = await getDoc(ref);
+      
+      if (snap.exists()) {
+        const mediaData = { 
+          id: snap.id, 
+          type: type,
+          ...snap.data() 
+        };
+        setMedia(mediaData);
+        return mediaData;
+      } else {
+        console.error('Mídia não encontrada:', { id, type });
+        navigate("/app", { replace: true });
+        return null;
+      }
+    } catch (error) {
+      console.error('Erro ao carregar mídia:', error);
+      navigate("/app", { replace: true });
+      return null;
+    }
   }, [id, type, navigate]);
 
+  // Carrega o primeiro episódio para séries
+  const loadFirstEpisode = useCallback(async (mediaData) => {
+    if (!mediaData || mediaData.type !== 'series') return null;
+
+    try {
+      const seasonsRef = collection(db, `series/${id}/seasons`);
+      const seasonsQuery = query(seasonsRef, orderBy('number', 'asc'));
+      const seasonsSnap = await getDocs(seasonsQuery);
+      
+      if (seasonsSnap.empty) return null;
+      
+      const firstSeason = seasonsSnap.docs[0];
+      const seasonNumber = firstSeason.data().number || 1;
+      
+      const episodesRef = collection(db, `series/${id}/seasons/${firstSeason.id}/episodes`);
+      const episodesQuery = query(episodesRef, orderBy('number', 'asc'));
+      const episodesSnap = await getDocs(episodesQuery);
+      
+      if (episodesSnap.empty) return null;
+      
+      const firstEpisode = episodesSnap.docs[0];
+      const episodeNumber = firstEpisode.data().number || 1;
+      
+      return { seasonNumber, episodeNumber };
+    } catch (error) {
+      console.error("Erro ao carregar primeiro episódio:", error);
+      return null;
+    }
+  }, [id]);
+
+  // Efeito principal de carregamento
+  useEffect(() => {
+    const initialize = async () => {
+      try {
+        setIsLoading(true);
+        const mediaData = await loadMedia();
+        
+        if (mediaData?.type === 'series') {
+          const episodeData = await loadFirstEpisode(mediaData);
+          if (episodeData) {
+            navigate(
+              `/watch/series/${id}/season/${episodeData.seasonNumber}/episode/${episodeData.episodeNumber}`, 
+              { replace: true }
+            );
+            return;
+          }
+        }
+      } catch (error) {
+        console.error("Erro na inicialização:", error);
+        navigate("/app", { replace: true });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initialize();
+  }, [loadMedia, loadFirstEpisode, id, navigate]);
+
+  // Efeito para salvar o progresso do vídeo
   useEffect(() => {
     if (!currentUser || !media) return;
+    
     const video = videoRef.current;
     if (!video) return;
 
     let lastSent = 0;
+    let isMounted = true;
 
-    async function saveProgress() {
-      if (!currentUser || !media || !video.duration) return;
+    const saveProgress = async () => {
+      if (!isMounted || !video.duration) return;
+      
       const now = Date.now();
-      if (now - lastSent < 5000) return; // a cada ~5s
+      if (now - lastSent < 5000) return;
+      
       lastSent = now;
       
-      const ref = doc(db, "users", currentUser.uid, "progress", media.id);
-      await setDoc(ref, {
-        currentTime: video.currentTime,
-        duration: video.duration,
-        type: media.type,
-        updatedAt: new Date(),
-      });
-    }
+      try {
+        const ref = doc(db, "users", currentUser.uid, "progress", media.id);
+        await setDoc(ref, {
+          currentTime: video.currentTime,
+          duration: video.duration,
+          type: media.type,
+          updatedAt: new Date(),
+        });
+      } catch (error) {
+        console.error("Erro ao salvar progresso:", error);
+      }
+    };
 
     video.addEventListener("timeupdate", saveProgress);
+    
     return () => {
+      isMounted = false;
       video.removeEventListener("timeupdate", saveProgress);
     };
   }, [currentUser, media]);
 
-  if (!media) {
+  if (isLoading || !media) {
     return (
       <div style={{
         backgroundColor: '#0f0f0f',
@@ -82,64 +152,6 @@ export default function Player() {
         fontSize: '1.2rem'
       }}>
         <div>Carregando {type === 'series' ? 'série' : 'filme'}...</div>
-      </div>
-    );
-  }
-
-  // Efeito para redirecionar para o primeiro episódio quando for uma série
-  useEffect(() => {
-    if (media?.type === 'series') {
-      async function loadFirstEpisode() {
-        try {
-          // Busca a primeira temporada
-          const seasonsRef = collection(db, `series/${id}/seasons`);
-          const seasonsQuery = query(seasonsRef, orderBy('number', 'asc'));
-          const seasonsSnap = await getDocs(seasonsQuery);
-          
-          if (!seasonsSnap.empty) {
-            const firstSeason = seasonsSnap.docs[0];
-            const seasonNumber = firstSeason.data().number || 1;
-            
-            // Busca o primeiro episódio da primeira temporada
-            const episodesRef = collection(db, `series/${id}/seasons/${firstSeason.id}/episodes`);
-            const episodesQuery = query(episodesRef, orderBy('number', 'asc'));
-            const episodesSnap = await getDocs(episodesQuery);
-            
-            if (!episodesSnap.empty) {
-              const firstEpisode = episodesSnap.docs[0];
-              const episodeNumber = firstEpisode.data().number || 1;
-              
-              // Redireciona para o player do primeiro episódio
-              navigate(`/watch/series/${id}/season/${seasonNumber}/episode/${episodeNumber}`, { replace: true });
-            }
-          }
-        } catch (error) {
-          console.error("Erro ao carregar primeiro episódio:", error);
-          // Em caso de erro, redireciona para a página inicial
-          navigate('/', { replace: true });
-        }
-      }
-      
-      loadFirstEpisode();
-    }
-  }, [id, navigate, media]);
-  
-  if (!media) {
-    return (
-      <div style={{
-        backgroundColor: '#0f0f0f',
-        minHeight: '100vh',
-        color: '#fff',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        fontSize: '1.2rem',
-        flexDirection: 'column',
-        gap: '20px',
-        padding: '20px',
-        textAlign: 'center'
-      }}>
-        <div>Carregando episódio...</div>
       </div>
     );
   }
