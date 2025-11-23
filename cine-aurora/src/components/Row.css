@@ -1,13 +1,77 @@
 /* src/components/Row.css */
-.row { margin: 18px 0; }
-.row__title { margin: 0 0 8px 6px; font-size: 18px; }
+.row { 
+  margin: 12px 0;
+  padding: 0 8px;
+}
+
+.row__title { 
+  margin: 0 0 12px 8px; 
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
 .row__scroller {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   overflow-x: auto;
-  padding: 6px;
-  scroll-snap-type: x proximity;
+  padding: 8px 4px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scroll-padding: 0 16px;
+  scrollbar-width: none; /* Para Firefox */
 }
-.row__scroller::-webkit-scrollbar { height: 8px; }
-.row__scroller::-webkit-scrollbar-thumb { background: #2f2f2f; border-radius: 8px; }
-.row__loading, .row__empty { color: var(--muted); padding: 8px; }
+
+/* Esconde a barra de rolagem no Chrome, Safari e Edge */
+.row__scroller::-webkit-scrollbar { 
+  display: none;
+  height: 6px;
+}
+
+.row__scroller::-webkit-scrollbar-thumb { 
+  background: var(--muted);
+  border-radius: 4px;
+}
+
+/* Estilo para os cards dentro do scroller */
+.row__scroller > * {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  width: 140px;
+}
+
+/* Estilos específicos para telas maiores */
+@media (min-width: 768px) {
+  .row {
+    margin: 18px 0;
+    padding: 0 24px;
+  }
+  
+  .row__title {
+    font-size: 1.4rem;
+    margin-bottom: 16px;
+  }
+  
+  .row__scroller {
+    gap: 16px;
+    padding: 12px 8px;
+  }
+  
+  .row__scroller > * {
+    width: 180px;
+  }
+}
+
+/* Estilo para telas muito pequenas */
+@media (max-width: 360px) {
+  .row__scroller > * {
+    width: 120px;
+  }
+}
+
+.row__loading, 
+.row__empty { 
+  color: var(--muted); 
+  padding: 16px 8px;
+  text-align: center;
+  font-size: 0.95rem;
+}

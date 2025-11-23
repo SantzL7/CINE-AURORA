@@ -1,0 +1,145 @@
+.card {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--card);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  aspect-ratio: 2/3;
+  min-width: 0; /* Garante que o card não ultrapasse o container */
+}
+
+.card__image {
+  width: 100%; 
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.card__overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0) 100%);
+  color: white;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.card:hover .card__overlay,
+.card:focus .card__overlay {
+  transform: translateY(0);
+}
+
+.card__title {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card__info {
+  font-size: 0.8rem;
+  color: var(--muted);
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.card__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.card:hover .card__actions,
+.card:focus .card__actions {
+  opacity: 1;
+}
+
+.card__button {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 4px;
+  color: white;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.card__button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.card__button--watchlist {
+  background: var(--accent);
+}
+
+.card__button--watchlist:hover {
+  background: #3b72e0;
+}
+
+/* Estilos para telas pequenas */
+@media (max-width: 480px) {
+  .card {
+    border-radius: 6px;
+  }
+  
+  .card__overlay {
+    padding: 8px;
+    transform: translateY(0);
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 50%, transparent 100%);
+  }
+  
+  .card__title {
+    font-size: 0.8rem;
+  }
+  
+  .card__info {
+    font-size: 0.7rem;
+  }
+  
+  .card__actions {
+    opacity: 1;
+    justify-content: center;
+  }
+  
+  .card__button {
+    width: 26px;
+    height: 26px;
+    font-size: 0.8rem;
+  }
+}
+
+/* Melhorias para acessibilidade */
+.card:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Melhora o feedback visual em dispositivos touch */
+@media (hover: none) {
+  .card__overlay {
+    transform: translateY(0);
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 50%, transparent 100%);
+  }
+  
+  .card__actions {
+    opacity: 1;
+  }
+}
