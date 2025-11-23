@@ -38,20 +38,20 @@ export default function Navbar() {
 
       <nav className="navbar__nav">
         <button
-          className={`navbar__link${location.pathname === "/app" ? " navbar__link--active" : ""}`}
+          className={`navbar__link${location.pathname === "/app" && !location.search ? " navbar__link--active" : ""}`}
           onClick={() => navigate("/app")}
         >
           Home
         </button>
         <button
-          className={`navbar__link${location.pathname === "/app" ? "" : ""}`}
-          onClick={() => navigate("/app")}
+          className={`navbar__link${location.search === "?type=movie" ? " navbar__link--active" : ""}`}
+          onClick={() => navigate("/app?type=movie")}
         >
           Filmes
         </button>
         <button
-          className={`navbar__link${location.pathname === "/app" ? "" : ""}`}
-          onClick={() => navigate("/app")}
+          className={`navbar__link${location.search === "?type=series" ? " navbar__link--active" : ""}`}
+          onClick={() => navigate("/app?type=series")}
         >
           Séries
         </button>

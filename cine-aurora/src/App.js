@@ -4,9 +4,11 @@ import ProtectedRoute, { AdminRoute } from "./components/ProtectedRoute";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Player from "./pages/Player";
+import EpisodePlayer from "./pages/EpisodePlayer";
 import Admin from "./pages/Admin";
 import SeriesEpisodes from "./pages/SeriesEpisodes";
 import Details from "./pages/Details";
+import SeriesDetails from "./pages/SeriesDetails";
 import MyList from "./pages/MyList";
 import Search from "./pages/Search";
 import LandingPage from "./pages/LandingPage";
@@ -43,6 +45,23 @@ function App() {
             }
           />
           <Route
+            path="/watch/movie/:id"
+            element={
+              <ProtectedRoute>
+                <Player type="movie" />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/watch/series/:seriesId/season/:seasonNumber/episode/:episodeNumber"
+            element={
+              <ProtectedRoute>
+                <EpisodePlayer />
+              </ProtectedRoute>
+            }
+          />
+          {/* Rota de fallback para compatibilidade com links antigos */}
+          <Route
             path="/watch/:id"
             element={
               <ProtectedRoute>
@@ -55,6 +74,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Details />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/series/:id"
+            element={
+              <ProtectedRoute>
+                <SeriesDetails />
               </ProtectedRoute>
             }
           />

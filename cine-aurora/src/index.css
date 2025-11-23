@@ -351,9 +351,9 @@
 }
 
  .error {
-   background: #3a0b0e;
-   color: #ffb3b8;
-   border: 1px solid #5c1a1f;
+   background: rgba(30, 58, 138, 0.3);
+   color: #93c5fd;
+   border: 1px solid #3b82f6;
    padding: 8px 12px;
    border-radius: 8px;
    margin-bottom: 12px;

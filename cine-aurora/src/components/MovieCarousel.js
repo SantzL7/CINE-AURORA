@@ -1,109 +1,243 @@
 import { useState, useEffect } from "react";
-import { collection, getDocs, query, limit } from "firebase/firestore";
+import { collection, getDocs, query, limit, where } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import { useNavigate } from "react-router-dom";
 
 export default function MovieCarousel() {
-  const [movies, setMovies] = useState([]);
+  const [items, setItems] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    async function loadRandomMovies() {
+    async function loadCarouselItems() {
       try {
-        // Busca todos os filmes
-        const moviesRef = collection(db, "movies");
-        const snapshot = await getDocs(moviesRef);
+        setLoading(true);
+        setError(null);
         
-        if (snapshot.empty) {
-          setLoading(false);
-          return;
+        // Busca apenas filmes com thumbnail
+        const moviesSnapshot = await getDocs(
+          query(
+            collection(db, "movies"),
+            where("thumbnailUrl", "!=", "")
+          )
+        );
+        
+        // Filtra filmes com thumbnail e mapeia corretamente
+        const allItems = moviesSnapshot.docs
+          .filter(doc => doc.data().thumbnailUrl)
+          .map(doc => ({
+            id: doc.id,
+            type: 'movie',
+            ...doc.data()
+          }));
+        
+        if (allItems.length === 0) {
+          throw new Error('Nenhum item com thumbnail encontrado');
         }
 
-        // Converte para array e seleciona 5 filmes aleatórios
-        const allMovies = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        const shuffled = [...allMovies].sort(() => 0.5 - Math.random());
-        const selectedMovies = shuffled.slice(0, 5);
+        // Seleciona até 5 itens aleatórios
+        const shuffled = [...allItems].sort(() => 0.5 - Math.random());
+        const selectedItems = shuffled.slice(0, 5);
         
-        setMovies(selectedMovies);
+        setItems(selectedItems);
       } catch (error) {
-        console.error("Erro ao carregar filmes:", error);
+        console.error("Erro ao carregar itens do carrossel:", error);
+        setError('Não foi possível carregar o carrossel');
       } finally {
         setLoading(false);
       }
     }
 
-    loadRandomMovies();
+    loadCarouselItems();
   }, []);
 
-  // Efeito para trocar automaticamente os filmes a cada 5 segundos
+  // Efeito para trocar automaticamente os itens a cada 5 segundos
   useEffect(() => {
-    if (movies.length <= 1) return;
+    if (items.length <= 1) return;
     
     const timer = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % movies.length);
-    }, 5000);
+      setCurrentIndex(prevIndex => (prevIndex + 1) % items.length);
+    }, 10000); // Aumentei para 10 segundos para dar mais tempo ao usuário
 
     return () => clearInterval(timer);
-  }, [movies.length]);
+  }, [items.length]);
 
   if (loading) {
     return (
-      <div className="carousel-loading">
-        <div className="spinner"></div>
+      <div style={{
+        height: '500px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#141414',
+        color: '#fff',
+        fontSize: '1.2rem'
+      }}>
+        <div>Carregando conteúdo do carrossel...</div>
       </div>
     );
   }
 
-  if (movies.length === 0) {
-    return null; // Não mostra nada se não houver filmes
+  if (error || items.length === 0) {
+    return (
+      <div style={{
+        height: '300px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#141414',
+        color: '#e50914',
+        textAlign: 'center',
+        padding: '20px'
+      }}>
+        {error || 'Nenhum conteúdo disponível no momento.'}
+      </div>
+    );
   }
 
-  const currentMovie = movies[currentIndex];
+  const currentItem = items[currentIndex];
 
   return (
-    <div className="carousel">
-      <div 
-        className="carousel-content"
+    <div className="carousel" style={{
+      position: 'relative',
+      height: '500px',
+      overflow: 'hidden',
+      backgroundColor: '#141414',
+      marginBottom: '40px'
+    }}>
+      {/* Imagem de fundo */}
+      {currentItem.thumbnailUrl && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundImage: `url(${currentItem.thumbnailUrl})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            opacity: 0.7
+          }}
+        />
+      )}
+
+      {/* Overlay escuro */}
+      <div
         style={{
-          backgroundImage: `linear-gradient(to right, rgba(5, 7, 11, 0.95) 0%, rgba(5, 7, 11, 0.7) 100%), url(${currentMovie.thumbnailUrl})`,
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          background: 'linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%)'
+        }}
+      />
+
+      {/* Conteúdo */}
+      <div
+        style={{
+          position: 'relative',
+          zIndex: 2,
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          padding: '0 40px',
+          maxWidth: '1200px',
+          margin: '0 auto'
         }}
       >
-        <div className="carousel-info">
-          <h1 className="carousel-title">{currentMovie.title}</h1>
-          <p className="carousel-desc">
-            {currentMovie.description?.length > 200 
-              ? `${currentMovie.description.substring(0, 200)}...` 
-              : currentMovie.description}
+        <div style={{ maxWidth: '600px' }}>
+          <h1 style={{
+            color: '#fff',
+            fontSize: '2.5rem',
+            margin: '0 0 20px 0',
+            textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
+          }}>
+            {currentItem.title}
+          </h1>
+          
+          <p style={{
+            color: '#fff',
+            fontSize: '1.1rem',
+            margin: '0 0 30px 0',
+            textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
+            display: '-webkit-box',
+            WebkitLineClamp: 3,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden'
+          }}>
+            {currentItem.description || 'Sinopse não disponível.'}
           </p>
-          <div className="carousel-buttons">
-            <button 
-              className="btn primary"
-              onClick={() => navigate(`/watch/${currentMovie.id}`)}
+          
+          <div style={{ display: 'flex', gap: '15px' }}>
+            <button
+              onClick={() => {
+                const path = currentItem.type === 'movie' 
+                  ? `/title/${currentItem.id}`
+                  : `/series/${currentItem.id}`;
+                navigate(path);
+              }}
+              style={{
+                padding: '12px 30px',
+                fontSize: '1.1rem',
+                backgroundColor: '#0071eb',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                transition: 'all 0.2s ease',
+                ':hover': {
+                  backgroundColor: '#1a7ff5',
+                  transform: 'translateY(-2px)'
+                },
+                ':active': {
+                  transform: 'translateY(0)'
+                }
+              }}
             >
-              Assistir agora
-            </button>
-            <button 
-              className="btn ghost"
-              onClick={() => navigate(`/details/${currentMovie.id}`)}
-            >
-              Mais informações
+              <span style={{ fontSize: '1.2rem' }}>ⓘ</span> 
+              <span>Ver {currentItem.type === 'movie' ? 'Detalhes' : 'Série'}</span>
             </button>
           </div>
         </div>
-        
-        <div className="carousel-indicators">
-          {movies.map((_, index) => (
+      </div>
+
+      {/* Indicadores de navegação */}
+      {items.length > 1 && (
+        <div style={{
+          position: 'absolute',
+          bottom: '20px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          display: 'flex',
+          gap: '10px',
+          zIndex: 3
+        }}>
+          {items.map((_, index) => (
             <button
               key={index}
-              className={`carousel-indicator ${index === currentIndex ? 'active' : ''}`}
               onClick={() => setCurrentIndex(index)}
-              aria-label={`Ir para o filme ${index + 1}`}
+              style={{
+                width: '12px',
+                height: '12px',
+                borderRadius: '50%',
+                border: 'none',
+                padding: 0,
+                backgroundColor: index === currentIndex ? '#0071eb' : 'rgba(255,255,255,0.5)',
+                cursor: 'pointer',
+                transition: 'background-color 0.3s'
+              }}
+              aria-label={`Ir para o item ${index + 1}`}
             />
           ))}
         </div>
-      </div>
+      )}
     </div>
   );
 }

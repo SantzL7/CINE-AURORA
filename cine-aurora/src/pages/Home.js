@@ -1,10 +1,61 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import MovieCarousel from "../components/MovieCarousel";
 import Row from "../components/Row";
 
+function ContentFiltered({ type }) {
+  if (type === 'movie') {
+    return (
+      <>
+        <Row title="Filmes em Destaque" type="movie" />
+        <Row title="Continuar assistindo" continueWatching type="movie" />
+        <Row title="Ação" genre="Acao" type="movie" />
+        <Row title="Comédia" genre="Comedia" type="movie" />
+        <Row title="Terror" genre="Terror" type="movie" />
+        <Row title="Ficção científica" genre="Ficcao cientifica" type="movie" />
+        <Row title="Romance" genre="Romance" type="movie" />
+        <Row title="Documentários" genre="Documentario" type="movie" />
+        <Row title="Minha lista" watchlist type="movie" />
+      </>
+    );
+  } else if (type === 'series') {
+    return (
+      <>
+        <Row title="Séries em Destaque" type="series" />
+        <Row title="Continuar assistindo" continueWatching type="series" />
+        <Row title="Ação" genre="Acao" type="series" />
+        <Row title="Comédia" genre="Comedia" type="series" />
+        <Row title="Terror" genre="Terror" type="series" />
+        <Row title="Ficção científica" genre="Ficcao cientifica" type="series" />
+        <Row title="Drama" genre="Drama" type="series" />
+        <Row title="Documentários" genre="Documentario" type="series" />
+        <Row title="Minha lista" watchlist type="series" />
+      </>
+    );
+  } else {
+    // Conteúdo padrão (home)
+    return (
+      <>
+        <Row title="Séries em Destaque" type="series" />
+        <Row title="Filmes em Destaque" type="movie" />
+        <Row title="Continuar assistindo" continueWatching />
+        <Row title="Ação" genre="Acao" />
+        <Row title="Comédia" genre="Comedia" />
+        <Row title="Terror" genre="Terror" />
+        <Row title="Ficção científica" genre="Ficcao cientifica" />
+        <Row title="Romance" genre="Romance" />
+        <Row title="Documentários" genre="Documentario" />
+        <Row title="Minha lista" watchlist />
+      </>
+    );
+  }
+}
+
 export default function Home() {
   const [showCarousel, setShowCarousel] = useState(false);
+  const [searchParams] = useSearchParams();
+  const type = searchParams.get('type');
 
   // Adiciona um pequeno atraso para garantir que os estilos sejam aplicados
   useEffect(() => {
@@ -18,16 +69,9 @@ export default function Home() {
     <>
       <Navbar />
       <main className="content">
-        {showCarousel && <MovieCarousel />}
+        {showCarousel && (!type || type === 'movie') && <MovieCarousel />}
         <section>
-          <Row title="Continuar assistindo" continueWatching />
-          <Row title="Ação" genre="Acao" />
-          <Row title="Comédia" genre="Comedia" />
-          <Row title="Terror" genre="Terror" />
-          <Row title="Ficção científica" genre="Ficcao cientifica" />
-          <Row title="Romance" genre="Romance" />
-          <Row title="Documentários" genre="Documentario" />
-          <Row title="Minha lista" watchlist />
+          <ContentFiltered type={type} />
         </section>
       </main>
     </>
