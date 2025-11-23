@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { db } from "../firebase/firebase";
 import { collection, getDocs, query, where, doc, getDoc, limit } from "firebase/firestore";
 import { useAuth } from "../context/AuthContext";
 import Card from "./Card";
 import SeriesCard from "./SeriesCard";
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import "./Row.css";
 
 export default function Row({ 
@@ -18,6 +19,37 @@ export default function Row({
   const [loading, setLoading] = useState(true);
   const { currentUser } = useAuth();
   const CardComponent = type === "series" ? SeriesCard : Card;
+  const scrollerRef = useRef(null);
+  const [showLeftButton, setShowLeftButton] = useState(false);
+  const [showRightButton, setShowRightButton] = useState(true);
+
+  const scroll = (direction) => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+    
+    const scrollAmount = direction === 'left' ? -400 : 400;
+    scroller.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+  };
+
+  const checkScroll = () => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+    
+    setShowLeftButton(scroller.scrollLeft > 0);
+    setShowRightButton(
+      scroller.scrollLeft < scroller.scrollWidth - scroller.clientWidth - 10
+    );
+  };
+
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+    if (scroller) {
+      scroller.addEventListener('scroll', checkScroll);
+      // Verificar estado inicial
+      checkScroll();
+      return () => scroller.removeEventListener('scroll', checkScroll);
+    }
+  }, [items]); // Re-run when items change
   
   // Função para buscar itens de uma coleção específica
   const fetchItems = async (collectionName, genre) => {
@@ -421,7 +453,7 @@ export default function Row({
       }
     }
     load();
-  }, [genre, watchlist, continueWatching, currentUser, type]);
+  }, [genre, watchlist, continueWatching, currentUser, type, title]);
 
   console.log('Renderizando Row com items:', {
     title,
@@ -439,15 +471,29 @@ export default function Row({
   return (
     <section className="row">
       <h2 className="row__title">{title}</h2>
-      <div className="row__scroller">
-        {loading ? (
-          <div className="row__loading">Carregando...</div>
-        ) : items.length === 0 ? (
-          <div className="row__empty">
-            {watchlist ? 'Nenhum item na sua lista' : 'Nenhum item encontrado'}
-          </div>
-        ) : (
-          items.map((item) => {
+      <div className="row__container">
+        {showLeftButton && (
+          <button 
+            className="nav-button nav-button--left" 
+            onClick={() => scroll('left')}
+            aria-label="Rolar para a esquerda"
+          >
+            <FaChevronLeft />
+          </button>
+        )}
+        
+        <div 
+          className="row__scroller" 
+          ref={scrollerRef}
+        >
+          {loading ? (
+            <div className="row__loading">Carregando...</div>
+          ) : items.length === 0 ? (
+            <div className="row__empty">
+              {watchlist ? 'Nenhum item na sua lista' : 'Nenhum item encontrado'}
+            </div>
+          ) : (
+            items.map((item) => {
             try {
               // Determina se o item é uma série com base no tipo ou no tipo da linha
               const isSeries = item.type === 'series' || type === 'series';
@@ -496,6 +542,17 @@ export default function Row({
               return null;
             }
           })
+        )}
+        </div>
+        
+        {showRightButton && (
+          <button 
+            className="nav-button nav-button--right" 
+            onClick={() => scroll('right')}
+            aria-label="Rolar para a direita"
+          >
+            <FaChevronRight />
+          </button>
         )}
       </div>
     </section>

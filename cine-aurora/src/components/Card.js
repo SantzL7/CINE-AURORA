@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useAuth } from "../context/AuthContext";
 import { db } from "../firebase/firebase";
 import { doc, getDoc, setDoc, deleteDoc } from "firebase/firestore";
@@ -14,7 +14,7 @@ export default function Card({ movie: movieProp, locked = false }) {
   const [isHovered, setIsHovered] = useState(false);
 
   // Garante que movie nunca será undefined ou nulo e define valores padrão
-  const movie = {
+  const movie = useMemo(() => ({
     id: movieProp?.id || '',
     title: movieProp?.title || 'Filme não disponível',
     thumbnailUrl: movieProp?.thumbnailUrl || DEFAULT_THUMBNAIL,
@@ -22,7 +22,7 @@ export default function Card({ movie: movieProp, locked = false }) {
     year: movieProp?.year || '',
     description: movieProp?.description || '',
     type: 'movie'
-  };
+  }), [movieProp]);
 
   // Verifica se o filme está na lista de favoritos
   const checkWatchlist = useCallback(async () => {

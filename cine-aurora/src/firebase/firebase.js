@@ -3,6 +3,7 @@ import { getAnalytics, isSupported as analyticsIsSupported } from "firebase/anal
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
+import { getDatabase } from "firebase/database";
 
 // Config fornecida pelo usuário
 const firebaseConfig = {
@@ -29,7 +30,9 @@ let analytics = null;
   }
 })();
 
+// Inicializa os serviços do Firebase
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
+export const database = getDatabase(app);
 export { analytics };
