@@ -107,147 +107,106 @@ export default function Card({ movie: movieProp, locked = false }) {
         cursor: locked ? 'not-allowed' : 'pointer',
         opacity: locked ? 0.7 : 1,
         transition: 'all 0.3s ease',
-        transform: isHovered ? 'scale(1.1)' : 'scale(1)',
+        transform: isHovered ? 'scale(1.05)' : 'scale(1)',
         zIndex: isHovered ? 2 : 1,
-        width: '220px',
-        minWidth: '220px',
+        width: '200px',
+        minWidth: '200px',
         height: 'auto',
         borderRadius: '8px',
         overflow: 'hidden',
-        boxShadow: '0 8px 16px rgba(0,0,0,0.2)',
-        display: 'flex',
-        flexDirection: 'column'
+        boxShadow: '0 4px 8px rgba(0,0,0,0.2)'
       }}
     >
-      <div 
-        style={{ 
-          position: 'relative', 
-          width: '100%', 
-          paddingTop: '142.2%',
-          cursor: 'pointer'
-        }}
-        onClick={handleClick}
-      >
-        <div className="card__image-container" style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          overflow: 'hidden',
-          borderRadius: '8px'
-        }}>
-          <img 
-            src={movie.thumbnailUrl} 
-            alt={`Capa de ${movie.title}`}
-            onError={handleImageError}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              transition: 'all 0.3s ease',
-              transform: isHovered ? 'scale(1.05)' : 'scale(1)'
-            }}
-          />
-        </div>
-        
-        <div 
-          className="card__overlay" 
+      <div style={{ position: 'relative', width: '100%', paddingTop: '150%' }}>
+        <img 
+          src={movie.thumbnailUrl} 
+          alt={`Capa de ${movie.title}`}
+          onError={handleImageError}
           style={{
             position: 'absolute',
             top: 0,
             left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'linear-gradient(transparent 0%, rgba(0,0,0,0.8) 100%)',
-            opacity: isHovered ? 1 : 0,
-            transition: 'all 0.3s ease',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'flex-end',
-            padding: '16px',
-            zIndex: 2,
-            cursor: 'pointer'
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            transition: 'transform 0.3s ease'
           }}
-          onClick={handleClick}
-        >
+        />
+        
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 50%)',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'flex-end',
+          padding: '12px',
+          opacity: isHovered ? 1 : 0,
+          transition: 'opacity 0.3s ease'
+        }}>
           <h3 style={{ 
-            margin: '0 0 8px 0', 
-            fontSize: '1.1rem',
-            fontWeight: '600',
-            color: 'white',
-            textShadow: '0 1px 3px rgba(0,0,0,0.5)'
+            color: '#fff', 
+            margin: '0 0 8px 0',
+            fontSize: '0.95rem',
+            textShadow: '0 1px 3px rgba(0,0,0,0.6)'
           }}>
             {movie.title}
           </h3>
-        
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginTop: '12px',
-          gap: '8px'
-        }}>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(`/title/${movie.id}`);
-            }}
-            style={{
-              background: 'rgba(255,255,255,0.9)',
-              color: '#000',
-              border: 'none',
-              borderRadius: '4px',
-              padding: '6px 12px',
-              fontSize: '0.9rem',
-              fontWeight: '600',
-              cursor: 'pointer',
-              flex: 1,
-              transition: 'all 0.2s ease',
-              textAlign: 'center'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.background = '#fff'}
-            onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.9)'}
-          >
-            Assistir
-          </button>
           
-        </div>
-      
           <div style={{ 
-            position: 'absolute',
-            top: '12px',
-            right: '12px',
-            zIndex: 3
+            display: 'flex', 
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginTop: 'auto'
           }}>
+            <div style={{ 
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              color: 'rgba(255,255,255,0.9)',
+              fontSize: '0.8rem'
+            }}>
+              {movie.year && (
+                <span>{movie.year}</span>
+              )}
+              {movie.genres?.[0] && (
+                <span>• {movie.genres[0]}</span>
+              )}
+            </div>
+            
             <button 
-              onClick={toggleWatchlist}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleWatchlist(e);
+              }}
               style={{
-                background: isInWatchlist ? '#0d6efd' : 'rgba(0, 0, 0, 0.7)',
-                border: isInWatchlist ? '2px solid #0d6efd' : '2px solid rgba(255, 255, 255, 0.7)',
+                background: isInWatchlist ? 'rgba(13, 110, 253, 0.9)' : 'rgba(0, 0, 0, 0.6)',
+                border: 'none',
+                color: '#fff',
+                width: '28px',
+                height: '28px',
                 borderRadius: '50%',
-                width: '34px',
-                height: '34px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'pointer',
-                color: 'white',
-                fontSize: '16px',
                 transition: 'all 0.2s ease',
-                opacity: isHovered ? 1 : 0.9,
-                transform: isHovered ? 'scale(1.1)' : 'scale(1)',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+                fontSize: '1rem'
               }}
               title={isInWatchlist ? 'Remover da lista' : 'Adicionar à lista'}
               onMouseEnter={(e) => {
                 if (isInWatchlist) {
                   e.currentTarget.innerHTML = '×';
+                  e.currentTarget.style.transform = 'scale(1.1)';
                 }
               }}
               onMouseLeave={(e) => {
                 if (isInWatchlist) {
                   e.currentTarget.innerHTML = '✓';
+                  e.currentTarget.style.transform = 'scale(1)';
                 }
               }}
             >
@@ -255,57 +214,6 @@ export default function Card({ movie: movieProp, locked = false }) {
             </button>
           </div>
         </div>
-      </div>
-      
-      {/* Título abaixo da imagem */}
-      <div style={{ 
-        padding: '8px 0 0 0',
-        minHeight: 'auto',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-start'
-      }}>
-        <h3 style={{ 
-          margin: 0, 
-          fontSize: '0.9rem',
-          fontWeight: '500',
-          color: 'var(--text)',
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          padding: '0 4px',
-          lineHeight: '1.2'
-        }}>
-          {movie.title}
-        </h3>
-        
-        {(movie.year || movie.genres?.length > 0) && (
-          <div style={{ 
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            marginTop: '4px',
-            padding: '0 4px',
-            color: 'var(--muted)',
-            fontSize: '0.8rem',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis'
-          }}>
-            {movie.year && (
-              <span>{movie.year}</span>
-            )}
-            {movie.year && movie.genres?.length > 0 && (
-              <span>•</span>
-            )}
-            {movie.genres?.slice(0, 1).map((genre, index) => (
-              <span key={index}>{genre}</span>
-            ))}
-            {movie.genres?.length > 1 && (
-              <span>+{movie.genres.length - 1}</span>
-            )}
-          </div>
-        )}
       </div>
       
       {locked && (
@@ -316,14 +224,13 @@ export default function Card({ movie: movieProp, locked = false }) {
           transform: 'translate(-50%, -50%)',
           background: 'rgba(0,0,0,0.7)',
           color: 'white',
-          padding: '6px 12px',
+          padding: '4px 8px',
           borderRadius: '4px',
-          fontSize: '0.9rem',
-          fontWeight: '600',
-          pointerEvents: 'none',
-          zIndex: 3
+          fontSize: '12px',
+          fontWeight: 'bold',
+          pointerEvents: 'none'
         }}>
-          Faça login para assistir
+          Faça login
         </div>
       )}
     </div>
