@@ -63,35 +63,268 @@ export default function Row({
 
   useEffect(() => {
     async function load() {
-      console.log('Row - Iniciando carregamento...', { title, type, watchlist, continueWatching });
+      console.log('Row - Iniciando carregamento...', { 
+        title, 
+        type, 
+        watchlist, 
+        continueWatching,
+        currentUser: currentUser?.uid || 'Nenhum usuário logado'
+      });
       setLoading(true);
       try {
         if (continueWatching) {
           if (!currentUser) {
-            setItems([]);
-            return;
-          }
-          const progSnap = await getDocs(
-            collection(db, "users", currentUser.uid, "progress")
-          );
-          const items = progSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
-          if (items.length === 0) {
+            console.log('Usuário não autenticado, não é possível carregar itens em andamento');
             setItems([]);
             return;
           }
           
-          const itemPromises = items.map((p) => 
-            getDoc(doc(db, type === 'series' ? 'series' : 'movies', p.id))
-          );
-          const itemSnaps = await Promise.all(itemPromises);
-          const data = itemSnaps
-            .filter((s) => s.exists())
-            .map((s) => {
-              const base = items.find((p) => p.id === s.id);
-              const progress = base && base.duration ? base.currentTime / base.duration : 0;
-              return { id: s.id, progress, ...s.data() };
+          console.log('Carregando itens em andamento...');
+          setLoading(true);
+          
+          try {
+            console.log('Buscando itens em progresso...');
+            console.log('Caminho da coleção progress:', `users/${currentUser.uid}/progress`);
+            console.log('Caminho da coleção watching:', `users/${currentUser.uid}/watching`);
+            
+            let progressSnap, watchingSnap, userWatchingList = [];
+            
+            try {
+              // Busca os itens em andamento (filmes e séries)
+              const [progressSnapResult, watchingSnapResult, userDoc] = await Promise.all([
+                getDocs(collection(db, "users", currentUser.uid, "progress")),
+                getDocs(collection(db, "users", currentUser.uid, "watching")),
+                getDoc(doc(db, "users", currentUser.uid))
+              ]);
+              
+              progressSnap = progressSnapResult;
+              watchingSnap = watchingSnapResult;
+              userWatchingList = userDoc.exists() ? (userDoc.data().watching || []) : [];
+              
+              console.log('Itens em progresso (filmes):', progressSnap.docs.map(d => ({
+                id: d.id,
+                ...d.data()
+              })));
+              
+              console.log('Séries assistindo:', watchingSnap.docs.map(d => ({
+                id: d.id,
+                ...d.data()
+              })));
+              
+              console.log('Lista de assistir do usuário:', userWatchingList);
+            } catch (error) {
+              console.error('Erro ao buscar itens em andamento:', error);
+              // Inicializa como vazio em caso de erro
+              progressSnap = { docs: [], size: 0, empty: true };
+              watchingSnap = { docs: [], size: 0, empty: true };
+            }
+
+            // Processa todos os itens em progresso da mesma forma
+            const allItems = [];
+            const processedSeriesIds = new Set();
+            
+            // Processa filmes (progress)
+            progressSnap.docs.forEach(doc => {
+              const data = doc.data();
+              console.log('Processando filme em andamento:', { id: doc.id, data });
+              
+              allItems.push({
+                id: doc.id,
+                type: 'movie',
+                currentTime: data.currentTime || 0,
+                duration: data.duration || 0,
+                ...data
+              });
             });
-          setItems(data);
+            
+            // Processa séries (watching)
+            watchingSnap.docs.forEach(doc => {
+              const data = doc.data();
+              console.log('Processando série em andamento:', { id: doc.id, data });
+              
+              // Usa o seriesId do documento ou extrai do ID se não estiver disponível
+              const seriesId = data.seriesId || doc.id.split('-')[0];
+              if (!seriesId) {
+                console.warn('Não foi possível extrair o ID da série do documento:', doc.id, data);
+                return;
+              }
+              
+              // Adiciona à lista de IDs processados
+              processedSeriesIds.add(seriesId);
+              
+              allItems.push({
+                id: seriesId,
+                type: 'series',
+                currentTime: data.currentTime || 0,
+                duration: data.duration || 0,
+                ...data,
+                seriesId: seriesId
+              });
+            });
+            
+            // Adiciona as séries da lista de assistir do usuário que ainda não foram processadas
+            userWatchingList.forEach(series => {
+              if (!series.seriesId) return;
+              
+              // Se a série já foi processada, pula para a próxima
+              if (processedSeriesIds.has(series.seriesId)) {
+                console.log(`Série ${series.seriesId} já está na lista de processadas`);
+                return;
+              }
+              
+              console.log('Adicionando série da lista de assistir:', series.seriesId);
+              
+              allItems.push({
+                id: series.seriesId,
+                type: 'series',
+                currentTime: 0,
+                duration: 0,
+                ...series
+              });
+            });
+            console.log('Itens em andamento encontrados:', allItems);
+
+            if (allItems.length === 0) {
+              console.log('Nenhum item em andamento encontrado');
+              setItems([]);
+              return;
+            }
+
+            // Filtra por tipo se especificado
+            console.log('Itens antes do filtro:', allItems.map(item => ({
+              id: item.id,
+              type: item.type,
+              title: item.title || 'Sem título',
+              seriesId: item.seriesId || 'N/A',
+              currentTime: item.currentTime,
+              duration: item.duration
+            })));
+            
+            const filteredItems = type 
+              ? allItems.filter(item => {
+                  // Normaliza o tipo para comparação
+                  const normalizedType = item.type === 'movies' ? 'movie' : item.type;
+                  const targetType = type === 'movies' ? 'movie' : type;
+                  const matches = normalizedType === targetType;
+                  
+                  console.log(`Item ${item.id} (${item.type} -> ${normalizedType}) - Filtro para ${targetType}:`, matches, 'Item completo:', {
+                    id: item.id,
+                    type: item.type,
+                    normalizedType,
+                    title: item.title || 'Sem título',
+                    seriesId: item.seriesId || 'N/A'
+                  });
+                  
+                  return matches;
+                })
+              : allItems;
+            console.log('Itens após filtro:', filteredItems.map(item => ({
+              id: item.id,
+              type: item.type,
+              title: item.title || 'Sem título',
+              seriesId: item.seriesId || 'N/A'
+            })));
+
+            // Busca os detalhes de cada item
+            const itemPromises = filteredItems.map(item => {
+              return new Promise(async (resolve) => {
+                try {
+                  const isSeries = item.type === 'series';
+                  const collectionName = isSeries ? 'series' : 'movies';
+                  const docId = isSeries ? (item.seriesId || item.id) : item.id;
+                  
+                  if (!docId) {
+                    console.warn('ID do documento inválido para o item:', item);
+                    resolve(null);
+                    return;
+                  }
+                  
+                  console.log(`Buscando ${collectionName}/${docId}...`, { item });
+                  
+                  const docSnap = await getDoc(doc(db, collectionName, docId));
+                  
+                  if (docSnap.exists()) {
+                    const itemData = docSnap.data();
+                    
+                    // Garante que temos um ID válido
+                    if (!itemData.id) {
+                      itemData.id = docSnap.id;
+                    }
+                    
+                    // Calcula o progresso (para filmes) ou usa o progresso salvo (para séries)
+                    const progress = item.duration > 0 
+                      ? (item.currentTime / item.duration) 
+                      : (itemData.duration ? (item.currentTime / itemData.duration) : 0);
+                    
+                    console.log(`Item carregado: ${docId} (${collectionName}), progresso: ${(progress * 100).toFixed(1)}%`, {
+                      id: docSnap.id,
+                      type: isSeries ? 'series' : 'movies',
+                      progress: Math.min(progress, 0.99),
+                      currentTime: item.currentTime,
+                      duration: item.duration || itemData.duration,
+                      hasThumbnail: !!(itemData.thumbnailUrl || itemData.poster_path || itemData.backdrop_path)
+                    });
+                    
+                    resolve({
+                      id: docSnap.id,
+                      type: isSeries ? 'series' : 'movies',
+                      progress: Math.min(progress, 0.99), // Limita a 99% para mostrar o botão de "Continuar"
+                      ...itemData,
+                      // Mantém as informações de progresso
+                      currentTime: item.currentTime,
+                      duration: item.duration || itemData.duration,
+                      // Garante que temos um ID de série para séries
+                      ...(isSeries && !itemData.seriesId ? { seriesId: docSnap.id } : {})
+                    });
+                  } else {
+                    console.warn(`Documento não encontrado: ${collectionName}/${docId}`, {
+                      item,
+                      collectionName,
+                      docId
+                    });
+                    resolve(null);
+                  }
+                } catch (error) {
+                  console.error(`Erro ao carregar item:`, error);
+                  resolve(null);
+                }
+              });
+            });
+
+            const itemSnaps = await Promise.all(itemPromises);
+            const validItems = itemSnaps.filter(Boolean);
+            
+            console.log('Itens carregados com sucesso:', validItems.map(item => ({
+              id: item.id,
+              type: item.type,
+              title: item.title || 'Sem título',
+              seriesId: item.seriesId || 'N/A',
+              progress: item.progress,
+              currentTime: item.currentTime,
+              duration: item.duration
+            })));
+            
+            // Log detalhado de cada item
+            validItems.forEach((item, index) => {
+              console.log(`Item ${index + 1}:`, {
+                id: item.id,
+                type: item.type,
+                title: item.title || 'Sem título',
+                progress: item.progress,
+                currentTime: item.currentTime,
+                duration: item.duration,
+                hasThumbnail: !!(item.thumbnailUrl || (item.backdrop_path || item.poster_path))
+              });
+            });
+            
+            setItems(validItems);
+
+          } catch (error) {
+            console.error('Erro ao carregar itens em andamento:', error);
+            setItems([]);
+          } finally {
+            setLoading(false);
+          }
         } else if (watchlist) {
           console.log('Carregando lista de favoritos...');
           if (!currentUser) {
@@ -120,11 +353,17 @@ export default function Row({
               const item = { id: docSnap.id, ...docSnap.data() };
               console.log('Item da watchlist:', item);
               
-              // Se o tipo não estiver definido, assume que é um filme (para compatibilidade)
-              const itemType = item.type || 'movies';
+              // Normaliza o tipo do item (aceita 'movie' ou 'movies' para filmes)
+              let itemType = item.type;
+              if (itemType === 'movie') {
+                itemType = 'movies'; // Padroniza para 'movies'
+              }
+              console.log(`Processando item ID: ${item.id}, Tipo: ${itemType}, Título: ${item.title || 'sem título'}`);
               
               // Se o tipo do item corresponder ao tipo solicitado (ou se não houver tipo específico)
-              if (!type || itemType === type) {
+              // E se o item tiver um tipo definido
+              console.log(`Verificando condições: type=${type}, itemType=${itemType}, itemType existe? ${!!itemType}`);
+              if ((!type || itemType === type) && itemType) {
                 try {
                   console.log(`Buscando ${itemType}/${item.id}...`);
                   const itemDoc = await getDoc(doc(db, itemType, item.id));
@@ -184,6 +423,19 @@ export default function Row({
     load();
   }, [genre, watchlist, continueWatching, currentUser, type]);
 
+  console.log('Renderizando Row com items:', {
+    title,
+    type,
+    itemsCount: items.length,
+    items: items.map(item => ({
+      id: item.id,
+      type: item.type,
+      title: item.title || 'Sem título',
+      seriesId: item.seriesId || 'N/A',
+      hasThumbnail: !!(item.thumbnailUrl || item.poster_path || item.backdrop_path)
+    }))
+  });
+  
   return (
     <section className="row">
       <h2 className="row__title">{title}</h2>
@@ -196,14 +448,53 @@ export default function Row({
           </div>
         ) : (
           items.map((item) => {
-            console.log('Renderizando item:', item);
-            const isSeries = item.type === 'series' || type === 'series';
-            const Component = isSeries ? SeriesCard : Card;
-            const props = isSeries 
-              ? { series: item, locked: locked && !currentUser }
-              : { movie: item, locked: locked && !currentUser };
+            try {
+              // Determina se o item é uma série com base no tipo ou no tipo da linha
+              const isSeries = item.type === 'series' || type === 'series';
               
-            return <Component key={item.id} {...props} />;
+              console.log(`Renderizando item ${item.id} (${isSeries ? 'série' : 'filme'}):`, {
+                id: item.id,
+                type: item.type,
+                title: item.title || 'Sem título',
+                seriesId: item.seriesId || 'N/A',
+                hasThumbnail: !!(item.thumbnailUrl || item.poster_path || item.backdrop_path)
+              });
+              
+              // Escolhe o componente apropriado
+              const Component = isSeries ? SeriesCard : Card;
+              
+              // Prepara as props apropriadas para cada tipo de componente
+              const props = isSeries 
+                ? { 
+                    series: { 
+                      ...item,
+                      // Garante que o ID da série está definido
+                      id: item.seriesId || item.id,
+                      // Garante que temos um ID de série
+                      seriesId: item.seriesId || item.id
+                    }, 
+                    locked: locked && !currentUser 
+                  }
+                : { 
+                    movie: { 
+                      ...item,
+                      // Garante que o ID do filme está definido
+                      id: item.id 
+                    }, 
+                    locked: locked && !currentUser 
+                  };
+              
+              console.log(`Item ${item.id} - Props para ${isSeries ? 'SeriesCard' : 'Card'}:`, props);
+              
+              // Usa o ID da série para séries, se disponível
+              const key = isSeries ? (item.seriesId || item.id) : item.id;
+              
+              return <Component key={key} {...props} />;
+              
+            } catch (error) {
+              console.error('Erro ao renderizar item:', error, { item });
+              return null;
+            }
           })
         )}
       </div>

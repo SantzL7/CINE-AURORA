@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import MovieCarousel from "../components/MovieCarousel";
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../firebase/firebase';
+import { useAuth } from '../context/AuthContext';
 import Row from "../components/Row";
 
 function ContentFiltered({ type }) {
@@ -23,7 +26,6 @@ function ContentFiltered({ type }) {
     return (
       <>
         <Row title="Séries em Destaque" type="series" />
-        <Row title="Continuar assistindo" continueWatching type="series" />
         <Row title="Ação" genre="Acao" type="series" />
         <Row title="Comédia" genre="Comedia" type="series" />
         <Row title="Terror" genre="Terror" type="series" />
@@ -53,6 +55,7 @@ function ContentFiltered({ type }) {
 }
 
 export default function Home() {
+  const { currentUser } = useAuth();
   const [showCarousel, setShowCarousel] = useState(false);
   const [searchParams] = useSearchParams();
   const type = searchParams.get('type');
@@ -66,14 +69,14 @@ export default function Home() {
   }, []);
 
   return (
-    <>
-      <Navbar />
+    <div className="home">
       <main className="content">
+        <Navbar />
         {showCarousel && (!type || type === 'movie') && <MovieCarousel />}
         <section>
           <ContentFiltered type={type} />
         </section>
       </main>
-    </>
+    </div>
   );
 }
