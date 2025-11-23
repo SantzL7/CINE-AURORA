@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
 import { db } from "../firebase/firebase";
 import { doc, getDoc, setDoc, deleteDoc } from "firebase/firestore";
@@ -14,7 +14,7 @@ export default function SeriesCard({ series: seriesProp, locked = false }) {
   const [isHovered, setIsHovered] = useState(false);
   
   // Garante que series nunca será undefined ou nulo e define valores padrão
-  const series = useMemo(() => ({
+  const series = {
     id: seriesProp?.id || '',
     title: seriesProp?.title || 'Série não disponível',
     thumbnailUrl: seriesProp?.thumbnailUrl || DEFAULT_THUMBNAIL,
@@ -22,7 +22,7 @@ export default function SeriesCard({ series: seriesProp, locked = false }) {
     year: seriesProp?.year || '',
     type: seriesProp?.type || 'series', // Garante que o tipo está definido
     description: seriesProp?.description || ''
-  }), [seriesProp]);
+  };
 
   // Verifica se a série está na lista de favoritos
   const checkWatchlist = useCallback(async () => {
