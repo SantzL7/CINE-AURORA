@@ -1,11 +1,11 @@
-import { useState } from "react";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../firebase/firebase";
-import Navbar from "../components/Navbar";
-import Card from "../components/Card";
+import { useState } from 'react';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../firebase/firebase';
+import Navbar from '../components/layout/Navbar';
+import Card from '../components/features/Card';
 
 export default function Search() {
-  const [term, setTerm] = useState("");
+  const [term, setTerm] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -15,11 +15,9 @@ export default function Search() {
     if (!q) return;
     setLoading(true);
     try {
-      const snap = await getDocs(collection(db, "movies"));
+      const snap = await getDocs(collection(db, 'movies'));
       const all = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-      const filtered = all.filter((m) =>
-        (m.title || "").toLowerCase().includes(q)
-      );
+      const filtered = all.filter((m) => (m.title || '').toLowerCase().includes(q));
       setResults(filtered);
     } catch (err) {
       console.error(err);
@@ -44,7 +42,7 @@ export default function Search() {
         {!loading && results.length === 0 && term && (
           <div className="muted">Nenhum resultado encontrado.</div>
         )}
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
           {results.map((movie) => (
             <Card key={movie.id} movie={movie} />
           ))}

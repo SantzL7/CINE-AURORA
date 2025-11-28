@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
-import { collection, getDocs, query, limit, where } from "firebase/firestore";
-import { db } from "../firebase/firebase";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from 'react';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { db } from '../../firebase/firebase';
+import { useNavigate } from 'react-router-dom';
+import OptimizedImage from '../common/OptimizedImage';
 
 export default function MovieCarousel() {
   const [items, setItems] = useState([]);
@@ -15,24 +16,21 @@ export default function MovieCarousel() {
       try {
         setLoading(true);
         setError(null);
-        
+
         // Busca apenas filmes com thumbnail
         const moviesSnapshot = await getDocs(
-          query(
-            collection(db, "movies"),
-            where("thumbnailUrl", "!=", "")
-          )
+          query(collection(db, 'movies'), where('thumbnailUrl', '!=', ''))
         );
-        
+
         // Filtra filmes com thumbnail e mapeia corretamente
         const allItems = moviesSnapshot.docs
-          .filter(doc => doc.data().thumbnailUrl)
-          .map(doc => ({
+          .filter((doc) => doc.data().thumbnailUrl)
+          .map((doc) => ({
             id: doc.id,
             type: 'movie',
             ...doc.data()
           }));
-        
+
         if (allItems.length === 0) {
           throw new Error('Nenhum item com thumbnail encontrado');
         }
@@ -40,10 +38,10 @@ export default function MovieCarousel() {
         // Seleciona até 5 itens aleatórios
         const shuffled = [...allItems].sort(() => 0.5 - Math.random());
         const selectedItems = shuffled.slice(0, 5);
-        
+
         setItems(selectedItems);
       } catch (error) {
-        console.error("Erro ao carregar itens do carrossel:", error);
+        console.error('Erro ao carregar itens do carrossel:', error);
         setError('Não foi possível carregar o carrossel');
       } finally {
         setLoading(false);
@@ -56,9 +54,9 @@ export default function MovieCarousel() {
   // Efeito para trocar automaticamente os itens a cada 5 segundos
   useEffect(() => {
     if (items.length <= 1) return;
-    
+
     const timer = setInterval(() => {
-      setCurrentIndex(prevIndex => (prevIndex + 1) % items.length);
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % items.length);
     }, 10000); // Aumentei para 10 segundos para dar mais tempo ao usuário
 
     return () => clearInterval(timer);
@@ -66,15 +64,17 @@ export default function MovieCarousel() {
 
   if (loading) {
     return (
-      <div style={{
-        height: '500px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#141414',
-        color: '#fff',
-        fontSize: '1.2rem'
-      }}>
+      <div
+        style={{
+          height: '500px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#141414',
+          color: '#fff',
+          fontSize: '1.2rem'
+        }}
+      >
         <div>Carregando conteúdo do carrossel...</div>
       </div>
     );
@@ -82,16 +82,18 @@ export default function MovieCarousel() {
 
   if (error || items.length === 0) {
     return (
-      <div style={{
-        height: '300px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#141414',
-        color: '#e50914',
-        textAlign: 'center',
-        padding: '20px'
-      }}>
+      <div
+        style={{
+          height: '300px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#141414',
+          color: '#e50914',
+          textAlign: 'center',
+          padding: '20px'
+        }}
+      >
         {error || 'Nenhum conteúdo disponível no momento.'}
       </div>
     );
@@ -100,13 +102,16 @@ export default function MovieCarousel() {
   const currentItem = items[currentIndex];
 
   return (
-    <div className="carousel" style={{
-      position: 'relative',
-      height: '500px',
-      overflow: 'hidden',
-      backgroundColor: '#141414',
-      marginBottom: '40px'
-    }}>
+    <div
+      className="carousel"
+      style={{
+        position: 'relative',
+        height: '500px',
+        overflow: 'hidden',
+        backgroundColor: '#141414',
+        marginBottom: '40px'
+      }}
+    >
       {/* Imagem de fundo */}
       {currentItem.thumbnailUrl && (
         <div
@@ -116,12 +121,19 @@ export default function MovieCarousel() {
             left: 0,
             width: '100%',
             height: '100%',
-            backgroundImage: `url(${currentItem.thumbnailUrl})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
             opacity: 0.7
           }}
-        />
+        >
+          <OptimizedImage
+            src={currentItem.thumbnailUrl}
+            alt={currentItem.title}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover'
+            }}
+          />
+        </div>
       )}
 
       {/* Overlay escuro */}
@@ -150,34 +162,39 @@ export default function MovieCarousel() {
         }}
       >
         <div style={{ maxWidth: '600px' }}>
-          <h1 style={{
-            color: '#fff',
-            fontSize: '2.5rem',
-            margin: '0 0 20px 0',
-            textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
-          }}>
+          <h1
+            style={{
+              color: '#fff',
+              fontSize: '2.5rem',
+              margin: '0 0 20px 0',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
+            }}
+          >
             {currentItem.title}
           </h1>
-          
-          <p style={{
-            color: '#fff',
-            fontSize: '1.1rem',
-            margin: '0 0 30px 0',
-            textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
-            display: '-webkit-box',
-            WebkitLineClamp: 3,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden'
-          }}>
+
+          <p
+            style={{
+              color: '#fff',
+              fontSize: '1.1rem',
+              margin: '0 0 30px 0',
+              textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
+              display: '-webkit-box',
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden'
+            }}
+          >
             {currentItem.description || 'Sinopse não disponível.'}
           </p>
-          
+
           <div style={{ display: 'flex', gap: '15px' }}>
             <button
               onClick={() => {
-                const path = currentItem.type === 'movie' 
-                  ? `/title/${currentItem.id}`
-                  : `/series/${currentItem.id}`;
+                const path =
+                  currentItem.type === 'movie'
+                    ? `/title/${currentItem.id}`
+                    : `/series/${currentItem.id}`;
                 navigate(path);
               }}
               style={{
@@ -191,17 +208,10 @@ export default function MovieCarousel() {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '10px',
-                transition: 'all 0.2s ease',
-                ':hover': {
-                  backgroundColor: '#1a7ff5',
-                  transform: 'translateY(-2px)'
-                },
-                ':active': {
-                  transform: 'translateY(0)'
-                }
+                transition: 'all 0.2s ease'
               }}
             >
-              <span style={{ fontSize: '1.2rem' }}>ⓘ</span> 
+              <span style={{ fontSize: '1.2rem' }}>ⓘ</span>
               <span>Ver {currentItem.type === 'movie' ? 'Detalhes' : 'Série'}</span>
             </button>
           </div>
@@ -210,15 +220,17 @@ export default function MovieCarousel() {
 
       {/* Indicadores de navegação */}
       {items.length > 1 && (
-        <div style={{
-          position: 'absolute',
-          bottom: '20px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          display: 'flex',
-          gap: '10px',
-          zIndex: 3
-        }}>
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '20px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            display: 'flex',
+            gap: '10px',
+            zIndex: 3
+          }}
+        >
           {items.map((_, index) => (
             <button
               key={index}

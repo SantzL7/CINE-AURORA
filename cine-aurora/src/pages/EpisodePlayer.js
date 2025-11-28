@@ -1,16 +1,29 @@
-import { useEffect, useState, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove, collection, query, where, getDocs, orderBy, limit } from "firebase/firestore";
-import { db } from "../firebase/firebase";
-import { useAuth } from "../context/AuthContext";
-import Navbar from "../components/Navbar";
+import { useEffect, useState, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import {
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  arrayUnion,
+  arrayRemove,
+  collection,
+  query,
+  where,
+  getDocs,
+  orderBy,
+  limit
+} from 'firebase/firestore';
+import { db } from '../firebase/firebase';
+import { useAuth } from '../context/AuthContext';
+import Navbar from '../components/layout/Navbar';
 
 export default function EpisodePlayer() {
   const { seriesId, seasonNumber, episodeNumber } = useParams();
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const videoRef = useRef(null);
-  
+
   const [series, setSeries] = useState(null);
   const [episode, setEpisode] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -21,66 +34,72 @@ export default function EpisodePlayer() {
     async function loadEpisode() {
       try {
         setLoading(true);
-        
+
         // Carrega os dados da série
         const seriesRef = doc(db, 'series', seriesId);
         const seriesSnap = await getDoc(seriesRef);
-        
+
         if (!seriesSnap.exists()) {
           throw new Error('Série não encontrada');
         }
-        
+
         setSeries({ id: seriesSnap.id, ...seriesSnap.data() });
-        
+
         // Carrega a temporada específica
         const seasonsRef = collection(db, `series/${seriesId}/seasons`);
         const seasonQuery = query(seasonsRef, where('number', '==', parseInt(seasonNumber)));
         const seasonSnap = await getDocs(seasonQuery);
-        
+
         if (seasonSnap.empty) {
           throw new Error('Temporada não encontrada');
         }
-        
+
         const seasonData = seasonSnap.docs[0];
         const seasonId = seasonData.id;
-        
+
         // Carrega o episódio específico
         const episodesRef = collection(db, `series/${seriesId}/seasons/${seasonId}/episodes`);
         const episodeQuery = query(episodesRef, where('number', '==', parseInt(episodeNumber)));
         const episodeSnap = await getDocs(episodeQuery);
-        
+
         if (episodeSnap.empty) {
           throw new Error('Episódio não encontrado');
         }
-        
-        const episodeData = { 
-          id: episodeSnap.docs[0].id, 
+
+        const episodeData = {
+          id: episodeSnap.docs[0].id,
           ...episodeSnap.docs[0].data(),
           seasonNumber: parseInt(seasonNumber),
           episodeNumber: parseInt(episodeNumber)
         };
-        
+
         setEpisode(episodeData);
-        
+
         // Tenta encontrar o próximo episódio na mesma temporada
-        const currentSeasonEpisodesRef = collection(db, `series/${seriesId}/seasons/${seasonId}/episodes`);
-        const currentSeasonEpisodesQuery = query(currentSeasonEpisodesRef, orderBy('number', 'asc'));
+        const currentSeasonEpisodesRef = collection(
+          db,
+          `series/${seriesId}/seasons/${seasonId}/episodes`
+        );
+        const currentSeasonEpisodesQuery = query(
+          currentSeasonEpisodesRef,
+          orderBy('number', 'asc')
+        );
         const currentSeasonEpisodesSnap = await getDocs(currentSeasonEpisodesQuery);
-        
+
         const episodes = [];
-        currentSeasonEpisodesSnap.forEach(doc => {
+        currentSeasonEpisodesSnap.forEach((doc) => {
           episodes.push({
             id: doc.id,
             ...doc.data(),
             episodeNumber: doc.data().number || 0
           });
         });
-        
+
         // Encontra o índice do episódio atual
-        const currentIndex = episodes.findIndex(ep => 
-          ep.episodeNumber === parseInt(episodeNumber)
+        const currentIndex = episodes.findIndex(
+          (ep) => ep.episodeNumber === parseInt(episodeNumber)
         );
-        
+
         // Se houver próximo episódio na mesma temporada, define-o
         if (currentIndex < episodes.length - 1) {
           setNextEpisode({
@@ -91,20 +110,23 @@ export default function EpisodePlayer() {
           // Se for o último episódio da temporada, verifica se há próxima temporada
           const seasonsRef = collection(db, `series/${seriesId}/seasons`);
           const nextSeasonQuery = query(
-            seasonsRef, 
+            seasonsRef,
             where('number', '==', parseInt(seasonNumber) + 1)
           );
           const nextSeasonSnap = await getDocs(nextSeasonQuery);
-          
+
           if (!nextSeasonSnap.empty) {
             const nextSeasonData = nextSeasonSnap.docs[0];
             const nextSeasonId = nextSeasonData.id;
-            
+
             // Busca o primeiro episódio da próxima temporada
-            const nextEpisodesRef = collection(db, `series/${seriesId}/seasons/${nextSeasonId}/episodes`);
+            const nextEpisodesRef = collection(
+              db,
+              `series/${seriesId}/seasons/${nextSeasonId}/episodes`
+            );
             const nextEpisodesQuery = query(nextEpisodesRef, orderBy('number', 'asc'), limit(1));
             const nextEpisodesSnap = await getDocs(nextEpisodesQuery);
-            
+
             if (!nextEpisodesSnap.empty) {
               const nextEpDoc = nextEpisodesSnap.docs[0];
               setNextEpisode({
@@ -116,7 +138,7 @@ export default function EpisodePlayer() {
             }
           }
         }
-        
+
         setLoading(false);
       } catch (err) {
         console.error('Erro ao carregar episódio:', err);
@@ -124,29 +146,29 @@ export default function EpisodePlayer() {
         setLoading(false);
       }
     }
-    
+
     if (seriesId && seasonNumber && episodeNumber) {
       loadEpisode();
     }
   }, [seriesId, seasonNumber, episodeNumber]);
-  
+
   // Atualiza o progresso do usuário
   useEffect(() => {
     if (!currentUser || !episode) return;
-    
+
     const video = videoRef.current;
     if (!video) return;
-    
+
     let lastSent = 0;
     let timeoutId = null;
-    
+
     async function saveProgress() {
       if (!currentUser || !episode || !video.duration) return;
-      
+
       const now = Date.now();
       if (now - lastSent < 5000) return; // A cada ~5s
       lastSent = now;
-      
+
       const progressData = {
         seriesId: series.id,
         seasonNumber: episode.seasonNumber,
@@ -157,90 +179,26 @@ export default function EpisodePlayer() {
         title: episode.title || `Episódio ${episode.episodeNumber}`,
         thumbnailUrl: episode.thumbnailUrl || series.thumbnailUrl
       };
-      
+
       try {
-        console.log('Tentando salvar progresso...', progressData);
-        const userRef = doc(db, "users", currentUser.uid);
+        const userRef = doc(db, 'users', currentUser.uid);
         const docId = `${series.id}-${episode.seasonNumber}-${episode.episodeNumber}`;
-        const progressRef = doc(db, "users", currentUser.uid, "watching", docId);
-        
-        console.log('Referência do documento:', progressRef.path);
-        
+        const progressRef = doc(db, 'users', currentUser.uid, 'watching', docId);
+
         // Primeiro, verifica se já existe um documento de progresso
         const progressSnap = await getDoc(progressRef);
-        console.log('Documento existe?', progressSnap.exists());
-        
+
         if (progressSnap.exists()) {
           // Se existir, atualiza
-          console.log('Atualizando documento existente...');
           await updateDoc(progressRef, progressData);
-          console.log('Progresso atualizado com sucesso:', progressData);
         } else {
           // Se não existir, cria um novo
-          console.log('Criando novo documento...');
           await setDoc(progressRef, progressData);
-          console.log('Novo progresso salvo com sucesso:', progressData);
-          
+
           // Adiciona à lista de assistindo do usuário
-          console.log('Adicionando à lista de assistindo...');
-          await updateDoc(userRef, {
-            watching: arrayUnion({
-              seriesId: series.id,
-              seasonNumber: episode.seasonNumber,
-              episodeNumber: episode.episodeNumber,
-              title: episode.title || `Episódio ${episode.episodeNumber}`,
-              thumbnailUrl: episode.thumbnailUrl || series.thumbnailUrl || ''
-            })
-          }, { merge: true });
-          console.log('Série adicionada à lista de assistindo');
-        }
-      } catch (err) {
-        console.error('Erro ao salvar progresso:', err);
-      }
-    }
-    
-    function handleTimeUpdate() {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-      
-      timeoutId = setTimeout(saveProgress, 1000);
-    }
-    
-    async function handleVideoEnd() {
-      // Marcar episódio como concluído
-      if (currentUser && episode && series) {
-        try {
-          const progressRef = doc(db, "users", currentUser.uid, "watching", `${series.id}-${episode.seasonNumber}-${episode.episodeNumber}`);
-          
-          // Primeiro, verifica se já existe um documento de progresso
-          const progressSnap = await getDoc(progressRef);
-          
-          const completedData = {
-            seriesId: series.id,
-            seasonNumber: episode.seasonNumber,
-            episodeNumber: episode.episodeNumber,
-            completed: true,
-            completedAt: new Date(),
-            title: episode.title || `Episódio ${episode.episodeNumber}`,
-            thumbnailUrl: episode.thumbnailUrl || (series.thumbnailUrl || ''),
-            // Mantém o progresso atual se existir
-            ...(progressSnap.exists() ? {
-              currentTime: progressSnap.data().currentTime,
-              duration: progressSnap.data().duration,
-              updatedAt: new Date()
-            } : {})
-          };
-          
-          // Atualiza ou cria o documento de progresso
-          if (progressSnap.exists()) {
-            await updateDoc(progressRef, completedData);
-          } else {
-            await setDoc(progressRef, completedData);
-            
-            // Adiciona à lista de assistindo do usuário
-            const userRef = doc(db, "users", currentUser.uid);
-            await updateDoc(userRef, {
+          await updateDoc(
+            userRef,
+            {
               watching: arrayUnion({
                 seriesId: series.id,
                 seasonNumber: episode.seasonNumber,
@@ -248,72 +206,130 @@ export default function EpisodePlayer() {
                 title: episode.title || `Episódio ${episode.episodeNumber}`,
                 thumbnailUrl: episode.thumbnailUrl || series.thumbnailUrl || ''
               })
-            }, { merge: true });
+            },
+            { merge: true }
+          );
+        }
+      } catch (err) {
+        console.error('Erro ao salvar progresso:', err);
+      }
+    }
+
+    function handleTimeUpdate() {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+
+      timeoutId = setTimeout(saveProgress, 1000);
+    }
+
+    async function handleVideoEnd() {
+      // Marcar episódio como concluído
+      if (currentUser && episode && series) {
+        try {
+          const progressRef = doc(
+            db,
+            'users',
+            currentUser.uid,
+            'watching',
+            `${series.id}-${episode.seasonNumber}-${episode.episodeNumber}`
+          );
+
+          // Primeiro, verifica se já existe um documento de progresso
+          const progressSnap = await getDoc(progressRef);
+
+          const completedData = {
+            seriesId: series.id,
+            seasonNumber: episode.seasonNumber,
+            episodeNumber: episode.episodeNumber,
+            completed: true,
+            completedAt: new Date(),
+            title: episode.title || `Episódio ${episode.episodeNumber}`,
+            thumbnailUrl: episode.thumbnailUrl || series.thumbnailUrl || '',
+            // Mantém o progresso atual se existir
+            ...(progressSnap.exists()
+              ? {
+                  currentTime: progressSnap.data().currentTime,
+                  duration: progressSnap.data().duration,
+                  updatedAt: new Date()
+                }
+              : {})
+          };
+
+          // Atualiza ou cria o documento de progresso
+          if (progressSnap.exists()) {
+            await updateDoc(progressRef, completedData);
+          } else {
+            await setDoc(progressRef, completedData);
+
+            // Adiciona à lista de assistindo do usuário
+            const userRef = doc(db, 'users', currentUser.uid);
+            await updateDoc(
+              userRef,
+              {
+                watching: arrayUnion({
+                  seriesId: series.id,
+                  seasonNumber: episode.seasonNumber,
+                  episodeNumber: episode.episodeNumber,
+                  title: episode.title || `Episódio ${episode.episodeNumber}`,
+                  thumbnailUrl: episode.thumbnailUrl || series.thumbnailUrl || ''
+                })
+              },
+              { merge: true }
+            );
           }
-          
-          console.log('Episódio marcado como concluído com sucesso!');
         } catch (err) {
           console.error('Erro ao marcar episódio como concluído:', err);
         }
       }
     }
-    
+
     video.addEventListener('timeupdate', handleTimeUpdate);
     video.addEventListener('ended', handleVideoEnd);
-    
+
     // Carrega o tempo salvo, se existir
     async function loadProgress() {
-      console.log('Carregando progresso...');
       if (!currentUser || !video || !series || !episode) {
-        console.log('Dados insuficientes para carregar progresso:', { currentUser: !!currentUser, video: !!video, series: !!series, episode: !!episode });
         return;
       }
-      
+
       try {
         const docId = `${series.id}-${episode.seasonNumber}-${episode.episodeNumber}`;
-        console.log('Buscando progresso para o documento:', docId);
-        
-        const progressRef = doc(db, "users", currentUser.uid, "watching", docId);
-        console.log('Referência do documento:', progressRef.path);
-        
+
+        const progressRef = doc(db, 'users', currentUser.uid, 'watching', docId);
+
         const progressSnap = await getDoc(progressRef);
-        console.log('Documento encontrado?', progressSnap.exists());
-        
+
         if (progressSnap.exists()) {
           const data = progressSnap.data();
-          console.log('Dados do progresso encontrados:', data);
-          
+
           // Se o vídeo não foi concluído ou foi concluído recentemente, retoma do último ponto salvo
-          if ((!data.completed || (data.completedAt && (new Date() - data.completedAt) < 1000 * 60 * 60 * 24)) && 
-              data.currentTime && data.duration) {
-            
-            console.log('Retomando do ponto salvo:', { currentTime: data.currentTime, duration: data.duration });
-            
+          if (
+            (!data.completed ||
+              (data.completedAt && new Date() - data.completedAt < 1000 * 60 * 60 * 24)) &&
+            data.currentTime &&
+            data.duration
+          ) {
             // Se faltar menos de 10% para acabar, começa do início
-            if ((data.currentTime / data.duration) > 0.9) {
-              console.log('Vídeo estava perto do fim, reiniciando do início');
+            if (data.currentTime / data.duration > 0.9) {
               video.currentTime = 0;
             } else {
               // Retoma do ponto salvo, mas não mais que 5 segundos atrás
               const resumeTime = Math.max(0, data.currentTime - 5);
-              console.log('Retomando do tempo:', resumeTime);
               video.currentTime = resumeTime;
             }
           } else if (data.completed) {
             // Se o episódio foi concluído, começa do início
-            console.log('Episódio já foi concluído, começando do início');
             video.currentTime = 0;
           }
-        } else {
-          console.log('Nenhum progresso salvo encontrado para este episódio');
         }
       } catch (err) {
         console.error('Erro ao carregar progresso:', err);
       }
     }
-    
+
     loadProgress();
-    
+
     return () => {
       video.removeEventListener('timeupdate', handleTimeUpdate);
       video.removeEventListener('ended', handleVideoEnd);
@@ -322,7 +338,7 @@ export default function EpisodePlayer() {
       }
     };
   }, [currentUser, episode, series, seriesId, seasonNumber, episodeNumber]);
-  
+
   if (loading) {
     return (
       <div style={styles.loadingContainer}>
@@ -330,44 +346,38 @@ export default function EpisodePlayer() {
       </div>
     );
   }
-  
+
   if (error) {
     return (
       <div style={styles.errorContainer}>
         <div style={styles.errorMessage}>
           <h2>Erro ao carregar o episódio</h2>
           <p>{error}</p>
-          <button 
-            onClick={() => navigate(-1)}
-            style={styles.backButton}
-          >
+          <button onClick={() => navigate(-1)} style={styles.backButton}>
             Voltar
           </button>
         </div>
       </div>
     );
   }
-  
+
   if (!episode) {
     return (
       <div style={styles.errorContainer}>
         <div style={styles.errorMessage}>
           <h2>Episódio não encontrado</h2>
-          <button 
-            onClick={() => navigate(-1)}
-            style={styles.backButton}
-          >
+          <button onClick={() => navigate(-1)} style={styles.backButton}>
             Voltar
           </button>
         </div>
       </div>
     );
   }
-  
+
   return (
     <div style={styles.container}>
       <Navbar />
-      
+
       <main style={styles.main}>
         <div style={styles.videoContainer}>
           <div style={styles.videoWrapper}>
@@ -379,24 +389,21 @@ export default function EpisodePlayer() {
               style={styles.video}
               playsInline
             />
-            
+
             {!episode.videoUrl && (
               <div style={styles.videoError}>
                 <div style={styles.videoErrorContent}>
                   <div style={styles.videoErrorIcon}>🚫</div>
                   <h3>Vídeo não disponível</h3>
                   <p>O vídeo solicitado não pôde ser carregado.</p>
-                  <button 
-                    onClick={() => navigate(-1)}
-                    style={styles.videoErrorButton}
-                  >
+                  <button onClick={() => navigate(-1)} style={styles.videoErrorButton}>
                     Voltar
                   </button>
                 </div>
               </div>
             )}
           </div>
-          
+
           <div style={styles.episodeInfo}>
             <h1 style={styles.episodeTitle}>
               {series?.title || 'Série'} - {episode.title || `Episódio ${episode.episodeNumber}`}
@@ -406,19 +413,17 @@ export default function EpisodePlayer() {
                 </span>
               )}
             </h1>
-            
-            {episode.description && (
-              <p style={styles.episodeDescription}>
-                {episode.description}
-              </p>
-            )}
-            
+
+            {episode.description && <p style={styles.episodeDescription}>{episode.description}</p>}
+
             {nextEpisode && (
               <div style={styles.nextEpisode}>
                 <h3>Próximo:</h3>
                 <button
                   onClick={() => {
-                    navigate(`/watch/series/${seriesId}/season/${nextEpisode.seasonNumber}/episode/${nextEpisode.episodeNumber}`);
+                    navigate(
+                      `/watch/series/${seriesId}/season/${nextEpisode.seasonNumber}/episode/${nextEpisode.episodeNumber}`
+                    );
                   }}
                   style={styles.nextEpisodeButton}
                 >
@@ -428,8 +433,8 @@ export default function EpisodePlayer() {
                       {nextEpisode.title || `Episódio ${nextEpisode.episodeNumber}`}
                     </span>
                     <span style={styles.nextEpisodeDetails}>
-                      {nextEpisode.seasonNumber !== episode.seasonNumber 
-                        ? `Temporada ${nextEpisode.seasonNumber, episode.seasonNumber} • ` 
+                      {nextEpisode.seasonNumber !== episode.seasonNumber
+                        ? `Temporada ${(nextEpisode.seasonNumber, episode.seasonNumber)} • `
                         : ''}
                       Episódio {nextEpisode.episodeNumber}
                     </span>
@@ -439,12 +444,9 @@ export default function EpisodePlayer() {
             )}
           </div>
         </div>
-        
+
         <div style={styles.actions}>
-          <button 
-            onClick={() => navigate(-1)}
-            style={styles.backButton}
-          >
+          <button onClick={() => navigate(-1)} style={styles.backButton}>
             Voltar para a série
           </button>
         </div>

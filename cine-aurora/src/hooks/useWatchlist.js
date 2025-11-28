@@ -15,20 +15,24 @@ export function useWatchlist(user) {
     }
 
     const watchlistRef = collection(db, 'users', user.uid, 'watchlist');
-    const unsubscribe = onSnapshot(watchlistRef, (snapshot) => {
-      const items = [];
-      snapshot.forEach((doc) => {
-        items.push({
-          id: doc.id,
-          ...doc.data()
+    const unsubscribe = onSnapshot(
+      watchlistRef,
+      (snapshot) => {
+        const items = [];
+        snapshot.forEach((doc) => {
+          items.push({
+            id: doc.id,
+            ...doc.data()
+          });
         });
-      });
-      setWatchlist(items);
-      setLoading(false);
-    }, (error) => {
-      console.error('Erro ao carregar lista de favoritos:', error);
-      setLoading(false);
-    });
+        setWatchlist(items);
+        setLoading(false);
+      },
+      (error) => {
+        console.error('Erro ao carregar lista de favoritos:', error);
+        setLoading(false);
+      }
+    );
 
     return () => unsubscribe();
   }, [user]);
@@ -67,7 +71,7 @@ export function useWatchlist(user) {
 
   // Verifica se um item está na lista de favoritos
   const isInWatchlist = (itemId) => {
-    return watchlist.some(item => item.id === itemId);
+    return watchlist.some((item) => item.id === itemId);
   };
 
   // Alterna um item na lista de favoritos

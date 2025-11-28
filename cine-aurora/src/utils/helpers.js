@@ -9,7 +9,7 @@ export const getRandomElements = (array, count) => {
   if (array.length <= count) {
     return [...array].sort(() => Math.random() - 0.5);
   }
-  
+
   // Cria uma cópia do array para não modificar o original
   const shuffled = [...array].sort(() => 0.5 - Math.random());
   // Retorna os primeiros 'count' elementos do array embaralhado

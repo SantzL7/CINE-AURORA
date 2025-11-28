@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import Navbar from "../components/Navbar";
-import MovieCarousel from "../components/MovieCarousel";
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import Navbar from '../components/layout/Navbar';
+import MovieCarousel from '../components/features/MovieCarousel';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase/firebase';
 import { useAuth } from '../context/AuthContext';
-import Row from "../components/Row";
+import Row from '../components/features/Row';
 
 function ContentFiltered({ type }) {
   if (type === 'movie') {

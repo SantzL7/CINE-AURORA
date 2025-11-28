@@ -1,9 +1,9 @@
-import { useEffect, useState, useRef, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { doc, getDoc, setDoc, collection, query, orderBy, getDocs } from "firebase/firestore";
-import { db } from "../firebase/firebase";
-import { useAuth } from "../context/AuthContext";
-import Navbar from "../components/Navbar";
+import { useEffect, useState, useRef, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { doc, getDoc, setDoc, collection, query, orderBy, getDocs } from 'firebase/firestore';
+import { db } from '../firebase/firebase';
+import { useAuth } from '../context/AuthContext';
+import Navbar from '../components/layout/Navbar';
 
 export default function Player() {
   // Hooks de estado
@@ -17,61 +17,64 @@ export default function Player() {
   // Carrega os dados da mídia
   const loadMedia = useCallback(async () => {
     if (!id) return;
-    
+
     try {
       const collectionName = type === 'series' ? 'series' : 'movies';
       const ref = doc(db, collectionName, id);
       const snap = await getDoc(ref);
-      
+
       if (snap.exists()) {
-        const mediaData = { 
-          id: snap.id, 
+        const mediaData = {
+          id: snap.id,
           type: type,
-          ...snap.data() 
+          ...snap.data()
         };
         setMedia(mediaData);
         return mediaData;
       } else {
         console.error('Mídia não encontrada:', { id, type });
-        navigate("/app", { replace: true });
+        navigate('/app', { replace: true });
         return null;
       }
     } catch (error) {
       console.error('Erro ao carregar mídia:', error);
-      navigate("/app", { replace: true });
+      navigate('/app', { replace: true });
       return null;
     }
   }, [id, type, navigate]);
 
   // Carrega o primeiro episódio para séries
-  const loadFirstEpisode = useCallback(async (mediaData) => {
-    if (!mediaData || mediaData.type !== 'series') return null;
+  const loadFirstEpisode = useCallback(
+    async (mediaData) => {
+      if (!mediaData || mediaData.type !== 'series') return null;
 
-    try {
-      const seasonsRef = collection(db, `series/${id}/seasons`);
-      const seasonsQuery = query(seasonsRef, orderBy('number', 'asc'));
-      const seasonsSnap = await getDocs(seasonsQuery);
-      
-      if (seasonsSnap.empty) return null;
-      
-      const firstSeason = seasonsSnap.docs[0];
-      const seasonNumber = firstSeason.data().number || 1;
-      
-      const episodesRef = collection(db, `series/${id}/seasons/${firstSeason.id}/episodes`);
-      const episodesQuery = query(episodesRef, orderBy('number', 'asc'));
-      const episodesSnap = await getDocs(episodesQuery);
-      
-      if (episodesSnap.empty) return null;
-      
-      const firstEpisode = episodesSnap.docs[0];
-      const episodeNumber = firstEpisode.data().number || 1;
-      
-      return { seasonNumber, episodeNumber };
-    } catch (error) {
-      console.error("Erro ao carregar primeiro episódio:", error);
-      return null;
-    }
-  }, [id]);
+      try {
+        const seasonsRef = collection(db, `series/${id}/seasons`);
+        const seasonsQuery = query(seasonsRef, orderBy('number', 'asc'));
+        const seasonsSnap = await getDocs(seasonsQuery);
+
+        if (seasonsSnap.empty) return null;
+
+        const firstSeason = seasonsSnap.docs[0];
+        const seasonNumber = firstSeason.data().number || 1;
+
+        const episodesRef = collection(db, `series/${id}/seasons/${firstSeason.id}/episodes`);
+        const episodesQuery = query(episodesRef, orderBy('number', 'asc'));
+        const episodesSnap = await getDocs(episodesQuery);
+
+        if (episodesSnap.empty) return null;
+
+        const firstEpisode = episodesSnap.docs[0];
+        const episodeNumber = firstEpisode.data().number || 1;
+
+        return { seasonNumber, episodeNumber };
+      } catch (error) {
+        console.error('Erro ao carregar primeiro episódio:', error);
+        return null;
+      }
+    },
+    [id]
+  );
 
   // Efeito principal de carregamento
   useEffect(() => {
@@ -79,20 +82,20 @@ export default function Player() {
       try {
         setIsLoading(true);
         const mediaData = await loadMedia();
-        
+
         if (mediaData?.type === 'series') {
           const episodeData = await loadFirstEpisode(mediaData);
           if (episodeData) {
             navigate(
-              `/watch/series/${id}/season/${episodeData.seasonNumber}/episode/${episodeData.episodeNumber}`, 
+              `/watch/series/${id}/season/${episodeData.seasonNumber}/episode/${episodeData.episodeNumber}`,
               { replace: true }
             );
             return;
           }
         }
       } catch (error) {
-        console.error("Erro na inicialização:", error);
-        navigate("/app", { replace: true });
+        console.error('Erro na inicialização:', error);
+        navigate('/app', { replace: true });
       } finally {
         setIsLoading(false);
       }
@@ -104,7 +107,7 @@ export default function Player() {
   // Efeito para salvar o progresso do vídeo
   useEffect(() => {
     if (!currentUser || !media) return;
-    
+
     const video = videoRef.current;
     if (!video) return;
 
@@ -113,74 +116,84 @@ export default function Player() {
 
     const saveProgress = async () => {
       if (!isMounted || !video.duration) return;
-      
+
       const now = Date.now();
       if (now - lastSent < 5000) return;
-      
+
       lastSent = now;
-      
+
       try {
-        const ref = doc(db, "users", currentUser.uid, "progress", media.id);
+        const ref = doc(db, 'users', currentUser.uid, 'progress', media.id);
         await setDoc(ref, {
           currentTime: video.currentTime,
           duration: video.duration,
           type: media.type,
-          updatedAt: new Date(),
+          updatedAt: new Date()
         });
       } catch (error) {
-        console.error("Erro ao salvar progresso:", error);
+        console.error('Erro ao salvar progresso:', error);
       }
     };
 
-    video.addEventListener("timeupdate", saveProgress);
-    
+    video.addEventListener('timeupdate', saveProgress);
+
     return () => {
       isMounted = false;
-      video.removeEventListener("timeupdate", saveProgress);
+      video.removeEventListener('timeupdate', saveProgress);
     };
   }, [currentUser, media]);
 
   if (isLoading || !media) {
     return (
-      <div style={{
-        backgroundColor: '#0f0f0f',
-        minHeight: '100vh',
-        color: '#fff',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        fontSize: '1.2rem'
-      }}>
+      <div
+        style={{
+          backgroundColor: '#0f0f0f',
+          minHeight: '100vh',
+          color: '#fff',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          fontSize: '1.2rem'
+        }}
+      >
         <div>Carregando {type === 'series' ? 'série' : 'filme'}...</div>
       </div>
     );
   }
 
   return (
-    <div style={{
-      backgroundColor: '#0f0f0f',
-      minHeight: '100vh',
-      color: '#fff'
-    }}>
+    <div
+      style={{
+        backgroundColor: '#0f0f0f',
+        minHeight: '100vh',
+        color: '#fff'
+      }}
+    >
       <Navbar />
-      <main style={{
-        padding: '20px 5%',
-        maxWidth: '1400px',
-        margin: '0 auto',
-        paddingTop: '80px'
-      }}>
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '20px'
-        }}>
-          <div style={{
+      <main
+        style={{
+          padding: '20px 5%',
+          maxWidth: '1400px',
+          margin: '0 auto',
+          paddingTop: '80px'
+        }}
+      >
+        <div
+          style={{
             display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '20px'
-          }}>
-            <button 
+            flexDirection: 'column',
+            gap: '20px'
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '20px'
+            }}
+          >
+            <button
               onClick={() => navigate(-1)}
               style={{
                 backgroundColor: 'rgba(255, 255, 255, 0.1)',
@@ -205,17 +218,19 @@ export default function Player() {
               ← Voltar
             </button>
           </div>
-          
-          <div style={{
-            width: '100%',
-            maxHeight: '70vh',
-            backgroundColor: '#000',
-            borderRadius: '8px',
-            overflow: 'hidden',
-            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.5)',
-            position: 'relative',
-            paddingTop: '56.25%' /* 16:9 Aspect Ratio */
-          }}>
+
+          <div
+            style={{
+              width: '100%',
+              maxHeight: '70vh',
+              backgroundColor: '#000',
+              borderRadius: '8px',
+              overflow: 'hidden',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.5)',
+              position: 'relative',
+              paddingTop: '56.25%' /* 16:9 Aspect Ratio */
+            }}
+          >
             <video
               ref={videoRef}
               src={media.videoUrl}
@@ -233,25 +248,27 @@ export default function Player() {
               }}
             />
             {!media.videoUrl && (
-              <div style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: '#111',
-                color: '#fff',
-                padding: '20px',
-                textAlign: 'center'
-              }}>
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: '#111',
+                  color: '#fff',
+                  padding: '20px',
+                  textAlign: 'center'
+                }}
+              >
                 <div style={{ fontSize: '2rem', marginBottom: '10px' }}>🚫</div>
                 <h3>Vídeo não disponível</h3>
                 <p>O vídeo solicitado não pôde ser carregado.</p>
-                <button 
+                <button
                   onClick={() => navigate(-1)}
                   style={{
                     marginTop: '20px',
@@ -270,41 +287,49 @@ export default function Player() {
             )}
           </div>
 
-          <div style={{
-            padding: '0 20px',
-            maxWidth: '1000px',
-            margin: '0 auto',
-            textAlign: 'center'
-          }}>
-            <h1 style={{
-              fontSize: '2rem',
-              margin: '0 0 10px 0',
-              color: '#fff',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              flexWrap: 'wrap'
-            }}>
+          <div
+            style={{
+              padding: '0 20px',
+              maxWidth: '1000px',
+              margin: '0 auto',
+              textAlign: 'center'
+            }}
+          >
+            <h1
+              style={{
+                fontSize: '2rem',
+                margin: '0 0 10px 0',
+                color: '#fff',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                flexWrap: 'wrap'
+              }}
+            >
               {media.title}
               {media.year && (
-                <span style={{
-                  fontSize: '1.2rem',
-                  color: '#999',
-                  fontWeight: 'normal'
-                }}>
+                <span
+                  style={{
+                    fontSize: '1.2rem',
+                    color: '#999',
+                    fontWeight: 'normal'
+                  }}
+                >
                   ({media.year})
                 </span>
               )}
             </h1>
-            
+
             {media.description && (
-              <p style={{
-                fontSize: '1.1rem',
-                lineHeight: '1.7',
-                color: 'rgba(255, 255, 255, 0.85)',
-                margin: '0 auto',
-                maxWidth: '800px'
-              }}>
+              <p
+                style={{
+                  fontSize: '1.1rem',
+                  lineHeight: '1.7',
+                  color: 'rgba(255, 255, 255, 0.85)',
+                  margin: '0 auto',
+                  maxWidth: '800px'
+                }}
+              >
                 {media.description}
               </p>
             )}

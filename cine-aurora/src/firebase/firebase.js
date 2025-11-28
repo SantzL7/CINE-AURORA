@@ -1,19 +1,19 @@
-import { initializeApp } from "firebase/app";
-import { getAnalytics, isSupported as analyticsIsSupported } from "firebase/analytics";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
-import { getDatabase } from "firebase/database";
+import { initializeApp } from 'firebase/app';
+import { getAnalytics, isSupported as analyticsIsSupported } from 'firebase/analytics';
+import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
+import { getDatabase } from 'firebase/database';
 
 // Config fornecida pelo usuário
 const firebaseConfig = {
-  apiKey: "AIzaSyB5xS4Ww0TwerxNyCnn5wjGuLMlvLxiH78",
-  authDomain: "cine-aurora-84d97.firebaseapp.com",
-  projectId: "cine-aurora-84d97",
-  storageBucket: "cine-aurora-84d97.firebasestorage.app",
-  messagingSenderId: "123261466619",
-  appId: "1:123261466619:web:7f20edbcb975a8152b7d5e",
-  measurementId: "G-CPQ1ZC5FRH",
+  apiKey: 'AIzaSyB5xS4Ww0TwerxNyCnn5wjGuLMlvLxiH78',
+  authDomain: 'cine-aurora-84d97.firebaseapp.com',
+  projectId: 'cine-aurora-84d97',
+  storageBucket: 'cine-aurora-84d97.firebasestorage.app',
+  messagingSenderId: '123261466619',
+  appId: '1:123261466619:web:7f20edbcb975a8152b7d5e',
+  measurementId: 'G-CPQ1ZC5FRH'
 };
 
 const app = initializeApp(firebaseConfig);
@@ -22,7 +22,7 @@ const app = initializeApp(firebaseConfig);
 let analytics = null;
 (async () => {
   try {
-    if (typeof window !== "undefined" && (await analyticsIsSupported())) {
+    if (typeof window !== 'undefined' && (await analyticsIsSupported())) {
       analytics = getAnalytics(app);
     }
   } catch (_) {

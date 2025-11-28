@@ -1,12 +1,12 @@
 /* src/components/Row.css */
-.row { 
+.row {
   margin: 12px 0;
   padding: 0 8px;
   position: relative;
 }
 
-.row__title { 
-  margin: 0 0 12px 8px; 
+.row__title {
+  margin: 0 0 12px 8px;
   font-size: 1.1rem;
   font-weight: 500;
   color: #fff;
@@ -71,12 +71,12 @@
 }
 
 /* Esconde a barra de rolagem no Chrome, Safari e Edge */
-.row__scroller::-webkit-scrollbar { 
+.row__scroller::-webkit-scrollbar {
   display: none;
   height: 6px;
 }
 
-.row__scroller::-webkit-scrollbar-thumb { 
+.row__scroller::-webkit-scrollbar-thumb {
   background: var(--muted);
   border-radius: 4px;
 }
@@ -100,17 +100,17 @@
     margin: 18px 0;
     padding: 0 24px;
   }
-  
+
   .row__title {
     font-size: 1.4rem;
     margin-bottom: 16px;
   }
-  
+
   .row__scroller {
     gap: 16px;
     padding: 12px 8px;
   }
-  
+
   .row__scroller > * {
     width: 180px;
   }
@@ -123,9 +123,9 @@
   }
 }
 
-.row__loading, 
-.row__empty { 
-  color: var(--muted); 
+.row__loading,
+.row__empty {
+  color: var(--muted);
   padding: 16px 8px;
   text-align: center;
   font-size: 0.95rem;

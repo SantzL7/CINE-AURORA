@@ -1,0 +1,49 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Função auxiliar para verificar se o usuário é o administrador
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email == 'matheus0mendes0marinho@gmail.com';
+    }
+
+    // Função auxiliar para verificar se o usuário está autenticado
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Regras para a coleção de usuários
+    match /users/{userId} {
+      // Usuários podem ler e escrever apenas em seus próprios documentos
+      allow read, write: if isAuthenticated() && request.auth.uid == userId;
+      
+      // Regras para subcoleções de usuários (watchlist, progress, watching)
+      match /{document=**} {
+        allow read, write: if isAuthenticated() && request.auth.uid == userId;
+      }
+    }
+
+    // Regras para filmes
+    match /movies/{movieId} {
+      // Qualquer um pode ler (para a Landing Page funcionar)
+      allow read: if true;
+      // Apenas admin pode criar, atualizar ou deletar
+      allow write: if isAdmin();
+    }
+
+    // Regras para séries
+    match /series/{seriesId} {
+      // Qualquer um pode ler
+      allow read: if true;
+      // Apenas admin pode criar, atualizar ou deletar
+      allow write: if isAdmin();
+      
+      // Regras para subcoleções de séries (se houver, ex: seasons/episodes dentro do doc da série)
+      match /{document=**} {
+        allow read: if true;
+        allow write: if isAdmin();
+      }
+    }
+  }
+}
