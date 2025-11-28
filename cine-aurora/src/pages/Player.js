@@ -4,6 +4,24 @@ import { doc, getDoc, setDoc, collection, query, orderBy, getDocs } from 'fireba
 import { db } from '../firebase/firebase';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/layout/Navbar';
+import { getVideoSource } from '../utils/helpers';
+
+// Função auxiliar para extrair o ID do arquivo do Google Drive
+const getDriveFileId = (url) => {
+  if (!url) return '';
+
+  // Tenta extrair o ID do arquivo de diferentes formatos de URL
+  const fileMatch = url.match(/\/file\/d\/([\w-]+)/);
+  if (fileMatch && fileMatch[1]) return fileMatch[1];
+
+  const openMatch = url.match(/[&?]id=([\w-]+)/);
+  if (openMatch && openMatch[1]) return openMatch[1];
+
+  const directMatch = url.match(/^[\w-]{25,}$/);
+  if (directMatch) return directMatch[0];
+
+  return '';
+};
 
 export default function Player() {
   // Hooks de estado
@@ -13,6 +31,8 @@ export default function Player() {
   const { currentUser } = useAuth();
   const videoRef = useRef(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+  const [videoSources, setVideoSources] = useState([]);
 
   // Carrega os dados da mídia
   const loadMedia = useCallback(async () => {
@@ -75,6 +95,27 @@ export default function Player() {
     },
     [id]
   );
+
+  // Efeito para configurar as fontes de vídeo quando a mídia for carregada
+  useEffect(() => {
+    if (!media) return;
+
+    const sources = Array.isArray(media.videoUrl) ? media.videoUrl : [media.videoUrl];
+
+    // Se for um link do Google Drive, obtém as URLs de fallback
+    if (
+      media.videoUrl &&
+      typeof media.videoUrl === 'string' &&
+      media.videoUrl.includes('drive.google.com')
+    ) {
+      const driveSources = getVideoSource(media.videoUrl);
+      // Garante que driveSources seja um array
+      setVideoSources(Array.isArray(driveSources) ? driveSources : [driveSources]);
+    } else {
+      setVideoSources(sources);
+    }
+    setCurrentVideoIndex(0);
+  }, [media]);
 
   // Efeito principal de carregamento
   useEffect(() => {
@@ -226,28 +267,61 @@ export default function Player() {
               backgroundColor: '#000',
               borderRadius: '8px',
               overflow: 'hidden',
-              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.5)',
               position: 'relative',
-              paddingTop: '56.25%' /* 16:9 Aspect Ratio */
+              paddingTop: '56.25%' // 16:9 aspect ratio
             }}
           >
-            <video
-              ref={videoRef}
-              src={media.videoUrl}
-              controls
-              autoPlay
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                outline: 'none',
-                display: 'block',
-                backgroundColor: '#000'
-              }}
-            />
-            {!media.videoUrl && (
+            {media?.videoUrl?.includes('drive.google.com') ? (
+              <iframe
+                src={`https://drive.google.com/file/d/${getDriveFileId(media.videoUrl)}/preview`}
+                width="100%"
+                height="100%"
+                allow="autoplay"
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  border: 'none',
+                  backgroundColor: '#000'
+                }}
+                title="Player de vídeo"
+                allowFullScreen
+              ></iframe>
+            ) : videoSources.length > 0 ? (
+              <video
+                ref={videoRef}
+                key={`video-${currentVideoIndex}`}
+                src={videoSources[currentVideoIndex]}
+                controls
+                autoPlay
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  outline: 'none',
+                  display: 'block',
+                  backgroundColor: '#000'
+                }}
+                onError={(e) => {
+                  console.error('Erro ao carregar o vídeo:', e);
+
+                  // Tenta a próxima fonte de vídeo
+                  if (currentVideoIndex < videoSources.length - 1) {
+                    console.log('Tentando próxima fonte de vídeo...');
+                    setCurrentVideoIndex((prev) => prev + 1);
+                  } else {
+                    console.error('Todas as fontes de vídeo falharam');
+                  }
+                }}
+                onLoadedData={() => {
+                  console.log('Vídeo carregado com sucesso:', videoSources[currentVideoIndex]);
+                }}
+              />
+            ) : (
               <div
                 style={{
                   position: 'absolute',
