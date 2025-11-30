@@ -116,6 +116,10 @@ export default function Login() {
         case 'auth/too-many-requests':
           errorMessage = 'Muitas tentativas. Tente novamente mais tarde.';
           break;
+        default:
+          // Log unexpected error code for debugging
+          console.warn('Unhandled auth error:', error.code);
+          errorMessage = 'Ocorreu um erro inesperado. Por favor, tente novamente.';
       }
 
       setErr(errorMessage);

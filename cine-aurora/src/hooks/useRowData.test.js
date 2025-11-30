@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { useRowData } from './useRowData';
-import { getDocs, getDoc } from 'firebase/firestore';
+import { getDocs } from 'firebase/firestore';
 
 // Mock Firebase modules
 jest.mock('firebase/firestore', () => ({

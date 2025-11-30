@@ -2,9 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Navbar from '../components/layout/Navbar';
 import MovieCarousel from '../components/features/MovieCarousel';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../firebase/firebase';
-import { useAuth } from '../context/AuthContext';
+// Removidos imports não utilizados
 import Row from '../components/features/Row';
 
 function ContentFiltered({ type }) {
@@ -55,7 +53,6 @@ function ContentFiltered({ type }) {
 }
 
 export default function Home() {
-  const { currentUser } = useAuth();
   const [showCarousel, setShowCarousel] = useState(false);
   const [searchParams] = useSearchParams();
   const type = searchParams.get('type');

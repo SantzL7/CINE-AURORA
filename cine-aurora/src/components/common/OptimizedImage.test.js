@@ -10,11 +10,8 @@ describe('OptimizedImage Component', () => {
 
   test('renders placeholder initially', () => {
     render(<OptimizedImage {...defaultProps} />);
-    
-    // Verifica se a imagem está presente mas inicialmente oculta
     const img = screen.getByRole('img', { name: 'Test Image', hidden: true });
     expect(img).toBeInTheDocument();
-    // Verifica se a imagem está inicialmente oculta
     expect(img).toHaveStyle({ opacity: '0' });
   });
 

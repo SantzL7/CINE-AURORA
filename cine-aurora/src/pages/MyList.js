@@ -1,12 +1,9 @@
-import { useEffect, useState } from 'react';
-import { db } from '../firebase/firebase';
-import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/layout/Navbar';
 import Row from '../components/features/Row';
 
 export default function MyList() {
-  const { currentUser } = useAuth();
+  useAuth(); // Keep the hook call to maintain any potential side effects
 
   return (
     <>

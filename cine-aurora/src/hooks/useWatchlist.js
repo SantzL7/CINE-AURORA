@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { db } from '../firebase/firebase';
-import { doc, setDoc, deleteDoc, getDoc, collection, onSnapshot } from 'firebase/firestore';
+import { doc, setDoc, deleteDoc, collection, onSnapshot } from 'firebase/firestore';
 
 export function useWatchlist(user) {
   const [watchlist, setWatchlist] = useState([]);
