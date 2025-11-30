@@ -10,11 +10,12 @@ describe('OptimizedImage Component', () => {
 
   test('renders placeholder initially', () => {
     render(<OptimizedImage {...defaultProps} />);
-
-    // Verifica se o placeholder está sendo exibido (baseado na classe ou estilo)
-    // Como o placeholder é uma div com background, podemos verificar se a imagem principal está oculta ou se o container tem a classe correta
-    const container = screen.getByRole('img', { hidden: true }).parentElement;
-    expect(container).toBeInTheDocument();
+    
+    // Verifica se a imagem está presente mas inicialmente oculta
+    const img = screen.getByRole('img', { name: 'Test Image', hidden: true });
+    expect(img).toBeInTheDocument();
+    // Verifica se a imagem está inicialmente oculta
+    expect(img).toHaveStyle({ opacity: '0' });
   });
 
   test('renders image with correct attributes', () => {
