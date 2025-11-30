@@ -1,10 +1,14 @@
-name: CI
+name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, master, develop ]
+    branches: [main, master, develop]
   pull_request:
-    branches: [ main, master, develop ]
+    branches: [main, master, develop]
+
+env:
+  CI: true
+  NODE_ENV: test
 
 defaults:
   timeout-minutes: 10
@@ -14,37 +18,39 @@ jobs:
     name: Test and Lint
     runs-on: ubuntu-latest
     
-    strategy:
-      matrix:
-        node-version: [18.x]
-    
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    
-    - name: Install dependencies
-      run: npm ci
-    
-    - name: Run ESLint
-      run: npm run lint
-    
-    - name: Check formatting with Prettier
-      run: npx prettier --check "src/**/*.{js,jsx,css,md}"
-    
-    - name: Run tests
-      run: npm test -- --watchAll=false --passWithNoTests
-    
-    - name: Build production
-      run: npm run build
-      env:
-        NODE_ENV: production
-        CI: false
-
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm list --depth=0
+      
+      - name: Run ESLint
+        run: npx eslint --ext .js,.jsx src/
+      
+      - name: Check formatting with Prettier
+        run: npx prettier --check "src/**/*.{js,jsx,css,md}"
+      
+      - name: Run tests
+        run: |
+          npm test -- --watchAll=false --passWithNoTests --coverage
+          cat coverage/coverage-summary.json
+      
+      - name: Build production
+        run: |
+          npm run build --if-present
+          ls -la build/
+        env:
+          NODE_ENV: production
+  
   deploy:
     name: Deploy to GitHub Pages
     needs: test
@@ -52,26 +58,32 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Use Node.js 18.x
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18.x'
-        cache: 'npm'
-    
-    - name: Install dependencies
-      run: npm ci
-    
-    - name: Build
-      run: npm run build
-      env:
-        NODE_ENV: production
-        PUBLIC_URL: /cine-aurora
-    
-    - name: Deploy to GitHub Pages
-      uses: JamesIves/github-pages-deploy-action@v4
-      with:
-        folder: build
-        branch: gh-pages
-        clean: true
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build
+        run: |
+          npm run build
+          ls -la build/
+        env:
+          NODE_ENV: production
+          PUBLIC_URL: /
+      
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: build
+          branch: gh-pages
+          clean: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository-name: ${{ github.repository }}
+          target-folder: .
