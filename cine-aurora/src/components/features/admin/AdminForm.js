@@ -44,7 +44,7 @@ function AdminForm({
           <input
             className="input"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={e => setTitle(e.target.value)}
             required
           />
         </div>
@@ -54,12 +54,12 @@ function AdminForm({
             className="input"
             style={{ minHeight: 80, resize: 'vertical' }}
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={e => setDescription(e.target.value)}
           />
         </div>
         <div>
           <label>Tipo</label>
-          <select className="input" value={type} onChange={(e) => setType(e.target.value)}>
+          <select className="input" value={type} onChange={e => setType(e.target.value)}>
             <option value="movie">Filme</option>
             <option value="series">Série</option>
           </select>
@@ -80,7 +80,7 @@ function AdminForm({
               'Animacao',
               'Documentario',
               'Crime'
-            ].map((g) => {
+            ].map(g => {
               const checked = genres.includes(g);
               return (
                 <label
@@ -91,7 +91,7 @@ function AdminForm({
                     type="checkbox"
                     checked={checked}
                     onChange={() => {
-                      setGenres((prev) => (checked ? prev.filter((x) => x !== g) : [...prev, g]));
+                      setGenres(prev => (checked ? prev.filter(x => x !== g) : [...prev, g]));
                     }}
                   />
                   {g}
@@ -105,7 +105,7 @@ function AdminForm({
           <input
             className="input"
             value={thumbnailUrl}
-            onChange={(e) => setThumbnailUrl(e.target.value)}
+            onChange={e => setThumbnailUrl(e.target.value)}
             placeholder="https://..."
           />
         </div>
@@ -114,7 +114,7 @@ function AdminForm({
           <input
             className="input"
             value={videoUrl}
-            onChange={(e) => setVideoUrl(e.target.value)}
+            onChange={e => setVideoUrl(e.target.value)}
             placeholder="https://..."
             required={type === 'movie'}
           />
@@ -125,7 +125,7 @@ function AdminForm({
             className="input"
             type="number"
             value={year}
-            onChange={(e) => setYear(e.target.value)}
+            onChange={e => setYear(e.target.value)}
             placeholder="2024"
           />
         </div>

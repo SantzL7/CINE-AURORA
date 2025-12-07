@@ -225,12 +225,12 @@ export default function SeriesHero({
                   minWidth: '180px',
                   justifyContent: 'center'
                 }}
-                onMouseOver={(e) => {
+                onMouseOver={e => {
                   e.target.style.backgroundColor = inList
                     ? 'rgba(13, 110, 253, 0.2)'
                     : 'rgba(255, 255, 255, 0.2)';
                 }}
-                onMouseOut={(e) => {
+                onMouseOut={e => {
                   e.target.style.backgroundColor = inList
                     ? 'rgba(13, 110, 253, 0.1)'
                     : 'rgba(255, 255, 255, 0.1)';

@@ -3,7 +3,7 @@ import React, { useCallback } from 'react';
 function SeriesManager({ seasons, setSeasons, activeSeason, setActiveSeason }) {
   // Função para adicionar uma nova temporada
   const addSeason = useCallback(() => {
-    const newSeasonNumber = seasons.length > 0 ? Math.max(...seasons.map((s) => s.number)) + 1 : 1;
+    const newSeasonNumber = seasons.length > 0 ? Math.max(...seasons.map(s => s.number)) + 1 : 1;
     const newSeason = {
       number: newSeasonNumber,
       title: `Temporada ${newSeasonNumber}`,
@@ -24,7 +24,7 @@ function SeriesManager({ seasons, setSeasons, activeSeason, setActiveSeason }) {
 
   // Função para remover uma temporada
   const removeSeason = useCallback(
-    (index) => {
+    index => {
       if (seasons.length <= 1) return; // Não permite remover a última temporada
       const newSeasons = [...seasons];
       newSeasons.splice(index, 1);
@@ -36,7 +36,7 @@ function SeriesManager({ seasons, setSeasons, activeSeason, setActiveSeason }) {
 
   // Função para adicionar um novo episódio a uma temporada
   const addEpisode = useCallback(
-    (seasonIndex) => {
+    seasonIndex => {
       const newSeasons = [...seasons];
       const episodeNumber = newSeasons[seasonIndex].episodes.length + 1;
       newSeasons[seasonIndex].episodes.push({
@@ -124,7 +124,7 @@ function SeriesManager({ seasons, setSeasons, activeSeason, setActiveSeason }) {
             {season.title}
             {seasons.length > 1 && (
               <span
-                onClick={(e) => {
+                onClick={e => {
                   e.stopPropagation();
                   removeSeason(sIndex);
                 }}
@@ -165,7 +165,7 @@ function SeriesManager({ seasons, setSeasons, activeSeason, setActiveSeason }) {
                 type="text"
                 className="input"
                 value={seasons[activeSeason].title}
-                onChange={(e) => updateSeasonField(activeSeason, 'title', e.target.value)}
+                onChange={e => updateSeasonField(activeSeason, 'title', e.target.value)}
                 required
               />
             </div>
@@ -175,7 +175,7 @@ function SeriesManager({ seasons, setSeasons, activeSeason, setActiveSeason }) {
                 type="number"
                 className="input"
                 value={seasons[activeSeason].number}
-                onChange={(e) =>
+                onChange={e =>
                   updateSeasonField(activeSeason, 'number', parseInt(e.target.value) || 1)
                 }
                 min="1"
@@ -287,7 +287,7 @@ function SeriesManager({ seasons, setSeasons, activeSeason, setActiveSeason }) {
                     <input
                       type="text"
                       value={episode.title}
-                      onChange={(e) =>
+                      onChange={e =>
                         updateEpisodeField(activeSeason, eIndex, 'title', e.target.value)
                       }
                       style={{
@@ -315,7 +315,7 @@ function SeriesManager({ seasons, setSeasons, activeSeason, setActiveSeason }) {
                     <input
                       type="url"
                       value={episode.videoUrl || ''}
-                      onChange={(e) =>
+                      onChange={e =>
                         updateEpisodeField(activeSeason, eIndex, 'videoUrl', e.target.value)
                       }
                       style={{
@@ -343,7 +343,7 @@ function SeriesManager({ seasons, setSeasons, activeSeason, setActiveSeason }) {
                     </label>
                     <textarea
                       value={episode.description || ''}
-                      onChange={(e) =>
+                      onChange={e =>
                         updateEpisodeField(activeSeason, eIndex, 'description', e.target.value)
                       }
                       style={{
@@ -372,7 +372,7 @@ function SeriesManager({ seasons, setSeasons, activeSeason, setActiveSeason }) {
                     <input
                       type="url"
                       value={episode.thumbnailUrl || ''}
-                      onChange={(e) =>
+                      onChange={e =>
                         updateEpisodeField(activeSeason, eIndex, 'thumbnailUrl', e.target.value)
                       }
                       style={{
@@ -400,7 +400,7 @@ function SeriesManager({ seasons, setSeasons, activeSeason, setActiveSeason }) {
                     <input
                       type="number"
                       value={episode.duration || 0}
-                      onChange={(e) =>
+                      onChange={e =>
                         updateEpisodeField(
                           activeSeason,
                           eIndex,

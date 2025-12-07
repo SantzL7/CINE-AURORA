@@ -154,16 +154,16 @@ export default function LandingPage() {
               <div style={styles.buttonGroup}>
                 <button
                   style={styles.primaryButton}
-                  onMouseEnter={(e) => handleMouseEnter(e, styles.primaryButtonHover)}
-                  onMouseLeave={(e) => handleMouseLeave(e, styles.primaryButton)}
+                  onMouseEnter={e => handleMouseEnter(e, styles.primaryButtonHover)}
+                  onMouseLeave={e => handleMouseLeave(e, styles.primaryButton)}
                   onClick={() => navigate('/login')}
                 >
                   Entrar
                 </button>
                 <button
                   style={styles.secondaryButton}
-                  onMouseEnter={(e) => handleMouseEnter(e, styles.secondaryButtonHover)}
-                  onMouseLeave={(e) => handleMouseLeave(e, styles.secondaryButton)}
+                  onMouseEnter={e => handleMouseEnter(e, styles.secondaryButtonHover)}
+                  onMouseLeave={e => handleMouseLeave(e, styles.secondaryButton)}
                   onClick={() => navigate('/login')}
                 >
                   Criar conta gratuita
@@ -176,12 +176,12 @@ export default function LandingPage() {
             </div>
 
             <div style={styles.movieGrid}>
-              {[1, 2, 3, 4, 5, 6].map((i) => (
+              {[1, 2, 3, 4, 5, 6].map(i => (
                 <div
                   key={i}
                   style={styles.movieCard}
-                  onMouseEnter={(e) => handleMouseEnter(e, styles.movieCardHover)}
-                  onMouseLeave={(e) => handleMouseLeave(e, styles.movieCard)}
+                  onMouseEnter={e => handleMouseEnter(e, styles.movieCardHover)}
+                  onMouseLeave={e => handleMouseLeave(e, styles.movieCard)}
                 />
               ))}
             </div>

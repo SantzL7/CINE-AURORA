@@ -262,10 +262,10 @@ export default function Details() {
                       minWidth: '180px',
                       justifyContent: 'center'
                     }}
-                    onMouseOver={(e) => {
+                    onMouseOver={e => {
                       e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
                     }}
-                    onMouseOut={(e) => {
+                    onMouseOut={e => {
                       e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
                     }}
                   >

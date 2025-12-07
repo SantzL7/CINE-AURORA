@@ -28,7 +28,7 @@ export default function Row({
   const [showLeftButton, setShowLeftButton] = useState(false);
   const [showRightButton, setShowRightButton] = useState(true);
 
-  const scroll = useCallback((direction) => {
+  const scroll = useCallback(direction => {
     const scroller = scrollerRef.current;
     if (!scroller) return;
 
@@ -77,7 +77,7 @@ export default function Row({
               {watchlist ? 'Nenhum item na sua lista' : 'Nenhum item encontrado'}
             </div>
           ) : (
-            items.map((item) => {
+            items.map(item => {
               try {
                 // Determina se o item é uma série com base no tipo ou no tipo da linha
                 const isSeries = item.type === 'series' || type === 'series';

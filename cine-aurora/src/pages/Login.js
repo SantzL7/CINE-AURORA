@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 // Função para validar força da senha
-const validatePassword = (password) => {
+const validatePassword = password => {
   const minLength = 8;
   const hasUpperCase = /[A-Z]/.test(password);
   const hasLowerCase = /[a-z]/.test(password);
@@ -40,7 +40,7 @@ export default function Login() {
     let timer;
     if (isLocked && lockTime > 0) {
       timer = setTimeout(() => {
-        setLockTime((prev) => prev - 1);
+        setLockTime(prev => prev - 1);
       }, 1000);
     } else if (isLocked && lockTime === 0) {
       setIsLocked(false);
@@ -141,7 +141,7 @@ export default function Login() {
             type="email"
             placeholder="Email"
             value={email}
-            onChange={(e) => setEmail(e.target.value.trim())}
+            onChange={e => setEmail(e.target.value.trim())}
             required
             className="input"
             disabled={isLocked || isSubmitting}
@@ -153,7 +153,7 @@ export default function Login() {
             type="password"
             placeholder="Senha"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={e => setPassword(e.target.value)}
             required
             className="input"
             disabled={isLocked || isSubmitting}

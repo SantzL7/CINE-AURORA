@@ -47,7 +47,7 @@ export default function SeriesDetails() {
         const seasonsSnap = await getDocs(seasonsQuery);
 
         const seasonsData = await Promise.all(
-          seasonsSnap.docs.map(async (seasonDoc) => {
+          seasonsSnap.docs.map(async seasonDoc => {
             const seasonData = { id: seasonDoc.id, ...seasonDoc.data() };
 
             // Carrega os episódios de cada temporada
@@ -55,7 +55,7 @@ export default function SeriesDetails() {
             const episodesQuery = query(episodesRef, orderBy('number', 'asc'));
             const episodesSnap = await getDocs(episodesQuery);
 
-            const episodes = episodesSnap.docs.map((episodeDoc) => ({
+            const episodes = episodesSnap.docs.map(episodeDoc => ({
               id: episodeDoc.id,
               ...episodeDoc.data()
             }));

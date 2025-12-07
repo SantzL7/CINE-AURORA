@@ -86,7 +86,7 @@ export default function EpisodePlayer() {
         const currentSeasonEpisodesSnap = await getDocs(currentSeasonEpisodesQuery);
 
         const episodes = [];
-        currentSeasonEpisodesSnap.forEach((doc) => {
+        currentSeasonEpisodesSnap.forEach(doc => {
           episodes.push({
             id: doc.id,
             ...doc.data(),
@@ -95,9 +95,7 @@ export default function EpisodePlayer() {
         });
 
         // Encontra o índice do episódio atual
-        const currentIndex = episodes.findIndex(
-          (ep) => ep.episodeNumber === parseInt(episodeNumber)
-        );
+        const currentIndex = episodes.findIndex(ep => ep.episodeNumber === parseInt(episodeNumber));
 
         // Se houver próximo episódio na mesma temporada, define-o
         if (currentIndex < episodes.length - 1) {

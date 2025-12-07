@@ -4,6 +4,7 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { getDatabase } from 'firebase/database';
+import { getPerformance } from 'firebase/performance';
 
 // Configuração do Firebase usando variáveis de ambiente
 const firebaseConfig = {
@@ -35,4 +36,11 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const database = getDatabase(app);
-export { analytics };
+
+// Inicializa o Performance Monitoring
+let perf;
+if (typeof window !== 'undefined') {
+  perf = getPerformance(app);
+}
+
+export { analytics, perf };

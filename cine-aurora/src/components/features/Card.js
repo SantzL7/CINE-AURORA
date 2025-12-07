@@ -51,7 +51,7 @@ export default function Card({ movie: movieProp, locked = false }) {
 
   // Função para alternar o filme na lista de favoritos
   const toggleWatchlist = useCallback(
-    async (e) => {
+    async e => {
       e?.stopPropagation();
 
       if (!currentUser) {
@@ -181,7 +181,7 @@ export default function Card({ movie: movieProp, locked = false }) {
             </div>
 
             <button
-              onClick={(e) => {
+              onClick={e => {
                 e.stopPropagation();
                 toggleWatchlist(e);
               }}
@@ -200,13 +200,13 @@ export default function Card({ movie: movieProp, locked = false }) {
                 fontSize: '1rem'
               }}
               title={isInWatchlist ? 'Remover da lista' : 'Adicionar à lista'}
-              onMouseEnter={(e) => {
+              onMouseEnter={e => {
                 if (isInWatchlist) {
                   e.currentTarget.innerHTML = '×';
                   e.currentTarget.style.transform = 'scale(1.1)';
                 }
               }}
-              onMouseLeave={(e) => {
+              onMouseLeave={e => {
                 if (isInWatchlist) {
                   e.currentTarget.innerHTML = '✓';
                   e.currentTarget.style.transform = 'scale(1)';

@@ -29,7 +29,7 @@ export default function SeriesEpisodes() {
         // carregar episódios (coleção simples episodes)
         const epsRef = collection(db, 'series', id, 'episodes');
         const epsSnap = await getDocs(epsRef);
-        const allEpisodes = epsSnap.docs.map((e) => ({
+        const allEpisodes = epsSnap.docs.map(e => ({
           id: e.id,
           ...e.data()
         }));
@@ -62,9 +62,9 @@ export default function SeriesEpisodes() {
       });
       setEpisodeTitle('');
       setEpisodeUrl('');
-      setEpisodeNumber((prev) => Number(prev) + 1);
+      setEpisodeNumber(prev => Number(prev) + 1);
       // adiciona episódio recém-criado diretamente ao estado local
-      setEpisodes((prev) => {
+      setEpisodes(prev => {
         const next = [
           ...prev,
           {
@@ -109,7 +109,7 @@ export default function SeriesEpisodes() {
                 type="number"
                 min={1}
                 value={seasonNumber}
-                onChange={(e) => setSeasonNumber(Number(e.target.value) || 1)}
+                onChange={e => setSeasonNumber(Number(e.target.value) || 1)}
               />
             </div>
             <div>
@@ -119,7 +119,7 @@ export default function SeriesEpisodes() {
                 type="number"
                 min={1}
                 value={episodeNumber}
-                onChange={(e) => setEpisodeNumber(Number(e.target.value) || 1)}
+                onChange={e => setEpisodeNumber(Number(e.target.value) || 1)}
               />
             </div>
             <div>
@@ -127,7 +127,7 @@ export default function SeriesEpisodes() {
               <input
                 className="input"
                 value={episodeTitle}
-                onChange={(e) => setEpisodeTitle(e.target.value)}
+                onChange={e => setEpisodeTitle(e.target.value)}
               />
             </div>
             <div>
@@ -135,7 +135,7 @@ export default function SeriesEpisodes() {
               <input
                 className="input"
                 value={episodeUrl}
-                onChange={(e) => setEpisodeUrl(e.target.value)}
+                onChange={e => setEpisodeUrl(e.target.value)}
                 placeholder="https://..."
               />
             </div>
@@ -150,7 +150,7 @@ export default function SeriesEpisodes() {
           {episodes.length === 0 && <div>Sem episódios ainda.</div>}
           {episodes.length > 0 && (
             <div style={{ display: 'grid', gap: 8 }}>
-              {episodes.map((ep) => (
+              {episodes.map(ep => (
                 <div
                   key={`${ep.seasonId}-${ep.id}`}
                   className="auth-card"

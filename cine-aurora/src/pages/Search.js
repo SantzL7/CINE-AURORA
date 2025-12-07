@@ -16,8 +16,8 @@ export default function Search() {
     setLoading(true);
     try {
       const snap = await getDocs(collection(db, 'movies'));
-      const all = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-      const filtered = all.filter((m) => (m.title || '').toLowerCase().includes(q));
+      const all = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      const filtered = all.filter(m => (m.title || '').toLowerCase().includes(q));
       setResults(filtered);
     } catch (err) {
       console.error(err);
@@ -35,7 +35,7 @@ export default function Search() {
             className="input"
             placeholder="Buscar filmes e séries..."
             value={term}
-            onChange={(e) => setTerm(e.target.value)}
+            onChange={e => setTerm(e.target.value)}
           />
         </form>
         {loading && <div>Carregando...</div>}
@@ -43,7 +43,7 @@ export default function Search() {
           <div className="muted">Nenhum resultado encontrado.</div>
         )}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
-          {results.map((movie) => (
+          {results.map(movie => (
             <Card key={movie.id} movie={movie} />
           ))}
         </div>

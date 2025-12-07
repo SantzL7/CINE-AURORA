@@ -31,7 +31,7 @@ export default function Sidebar() {
         <button
           type="button"
           className="sidebar__avatar sidebar__avatar--large sidebar__avatar-btn"
-          onClick={() => setProfileOpen((open) => !open)}
+          onClick={() => setProfileOpen(open => !open)}
           title={currentUser?.email || 'Perfil'}
         >
           {(currentUser?.email || '?').charAt(0).toUpperCase()}
@@ -62,7 +62,7 @@ export default function Sidebar() {
           <span className="sidebar__icon-label">Buscar</span>
         </button>
         <nav className="sidebar__nav sidebar__nav--icons">
-          {navItems.map((item) => {
+          {navItems.map(item => {
             const active =
               item.path !== '/app'
                 ? location.pathname.startsWith(item.path)

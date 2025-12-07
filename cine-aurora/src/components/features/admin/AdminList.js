@@ -8,7 +8,7 @@ function AdminList({ items, loading, onEdit, onDelete }) {
       {!loading && items.length === 0 && <div>Sem títulos cadastrados.</div>}
       {!loading && items.length > 0 && (
         <div style={{ display: 'grid', gap: 8 }}>
-          {items.map((item) => (
+          {items.map(item => (
             <div
               key={item.id}
               className="admin-item"

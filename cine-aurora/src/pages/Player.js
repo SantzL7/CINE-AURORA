@@ -7,7 +7,7 @@ import Navbar from '../components/layout/Navbar';
 import { getVideoSource } from '../utils/helpers';
 
 // Função auxiliar para extrair o ID do arquivo do Google Drive
-const getDriveFileId = (url) => {
+const getDriveFileId = url => {
   if (!url) return '';
 
   // Tenta extrair o ID do arquivo de diferentes formatos de URL
@@ -65,7 +65,7 @@ export default function Player() {
 
   // Carrega o primeiro episódio para séries
   const loadFirstEpisode = useCallback(
-    async (mediaData) => {
+    async mediaData => {
       if (!mediaData || mediaData.type !== 'series') return null;
 
       try {
@@ -249,10 +249,10 @@ export default function Player() {
                 gap: '8px',
                 transition: 'all 0.2s ease'
               }}
-              onMouseOver={(e) => {
+              onMouseOver={e => {
                 e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
               }}
-              onMouseOut={(e) => {
+              onMouseOut={e => {
                 e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
               }}
             >
@@ -306,13 +306,13 @@ export default function Player() {
                   display: 'block',
                   backgroundColor: '#000'
                 }}
-                onError={(e) => {
+                onError={e => {
                   console.error('Erro ao carregar o vídeo:', e);
 
                   // Tenta a próxima fonte de vídeo
                   if (currentVideoIndex < videoSources.length - 1) {
                     console.log('Tentando próxima fonte de vídeo...');
-                    setCurrentVideoIndex((prev) => prev + 1);
+                    setCurrentVideoIndex(prev => prev + 1);
                   } else {
                     console.error('Todas as fontes de vídeo falharam');
                   }

@@ -21,7 +21,7 @@ export const getRandomElements = (array, count) => {
  * @param {number} minutes - Duração em minutos
  * @returns {string} Duração formatada
  */
-export const formatDuration = (minutes) => {
+export const formatDuration = minutes => {
   if (!minutes) return '--:--';
   const hours = Math.floor(minutes / 60);
   const mins = minutes % 60;
@@ -33,7 +33,7 @@ export const formatDuration = (minutes) => {
  * @param {string} dateString - Data no formato ISO
  * @returns {string} Data formatada
  */
-export const formatDate = (dateString) => {
+export const formatDate = dateString => {
   if (!dateString) return '';
   const options = { year: 'numeric', month: 'long', day: 'numeric' };
   return new Date(dateString).toLocaleDateString('pt-BR', options);
@@ -56,7 +56,7 @@ export const truncateText = (text, maxLength = 100) => {
  * @param {string} url - URL do vídeo (pode ser do Google Drive ou outro)
  * @returns {string|string[]} URL formatada para reprodução direta ou array de URLs para tentativas
  */
-export const getVideoSource = (url) => {
+export const getVideoSource = url => {
   if (!url) return null;
 
   // Se for um link do Google Drive, converte para link direto

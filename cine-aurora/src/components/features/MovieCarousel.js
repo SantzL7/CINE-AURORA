@@ -24,8 +24,8 @@ export default function MovieCarousel() {
 
         // Filtra filmes com thumbnail e mapeia corretamente
         const allItems = moviesSnapshot.docs
-          .filter((doc) => doc.data().thumbnailUrl)
-          .map((doc) => ({
+          .filter(doc => doc.data().thumbnailUrl)
+          .map(doc => ({
             id: doc.id,
             type: 'movie',
             ...doc.data()
@@ -56,7 +56,7 @@ export default function MovieCarousel() {
     if (items.length <= 1) return;
 
     const timer = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % items.length);
+      setCurrentIndex(prevIndex => (prevIndex + 1) % items.length);
     }, 10000); // Aumentei para 10 segundos para dar mais tempo ao usuário
 
     return () => clearInterval(timer);

@@ -44,7 +44,7 @@ export default function SeasonList({ seasons, seriesId, navigate }) {
             gap: '30px'
           }}
         >
-          {seasons.map((season) => (
+          {seasons.map(season => (
             <div
               key={season.id}
               style={{
@@ -121,7 +121,7 @@ export default function SeasonList({ seasons, seriesId, navigate }) {
                       gap: '12px'
                     }}
                   >
-                    {season.episodes.map((episode) => (
+                    {season.episodes.map(episode => (
                       <div
                         key={episode.id}
                         style={{
@@ -139,11 +139,11 @@ export default function SeasonList({ seasons, seriesId, navigate }) {
                             `/watch/series/${seriesId}/season/${season.number}/episode/${episode.number}`
                           );
                         }}
-                        onMouseOver={(e) => {
+                        onMouseOver={e => {
                           e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
                           e.currentTarget.style.transform = 'translateX(4px)';
                         }}
-                        onMouseOut={(e) => {
+                        onMouseOut={e => {
                           e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.03)';
                           e.currentTarget.style.transform = 'none';
                         }}

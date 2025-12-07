@@ -31,7 +31,7 @@ export default function Navbar() {
     }
   }
 
-  const handleNavigate = (path) => {
+  const handleNavigate = path => {
     navigate(path);
     setMobileMenuOpen(false);
   };

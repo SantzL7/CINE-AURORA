@@ -66,11 +66,11 @@ export default function NotFound() {
           transition: 'transform 0.2s ease, background-color 0.2s ease',
           boxShadow: '0 4px 10px rgba(0,0,0,0.3)'
         }}
-        onMouseOver={(e) => {
+        onMouseOver={e => {
           e.target.style.transform = 'scale(1.05)';
           e.target.style.backgroundColor = '#e6e6e6';
         }}
-        onMouseOut={(e) => {
+        onMouseOut={e => {
           e.target.style.transform = 'scale(1)';
           e.target.style.backgroundColor = '#fff';
         }}

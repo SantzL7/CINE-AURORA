@@ -60,7 +60,7 @@ export default function Admin() {
       // Carregar filmes
       const moviesRef = collection(db, 'movies');
       const moviesSnapshot = await getDocs(moviesRef);
-      const moviesList = moviesSnapshot.docs.map((doc) => ({
+      const moviesList = moviesSnapshot.docs.map(doc => ({
         id: doc.id,
         collectionType: 'movies',
         ...doc.data()
@@ -69,7 +69,7 @@ export default function Admin() {
       // Carregar séries
       const seriesRef = collection(db, 'series');
       const seriesSnapshot = await getDocs(seriesRef);
-      const seriesList = seriesSnapshot.docs.map((doc) => ({
+      const seriesList = seriesSnapshot.docs.map(doc => ({
         id: doc.id,
         collectionType: 'series',
         ...doc.data()
@@ -86,7 +86,7 @@ export default function Admin() {
 
   // Função para carregar temporadas e episódios de uma série
   // Função para carregar temporadas e episódios de uma série
-  const loadSeriesSeasons = useCallback(async (seriesId) => {
+  const loadSeriesSeasons = useCallback(async seriesId => {
     try {
       setLoading(true);
       const seasonsRef = collection(db, `series/${seriesId}/seasons`);
@@ -99,7 +99,7 @@ export default function Admin() {
         const episodesRef = collection(db, `series/${seriesId}/seasons/${seasonDoc.id}/episodes`);
         const episodesSnapshot = await getDocs(episodesRef);
 
-        const episodes = episodesSnapshot.docs.map((epDoc) => ({
+        const episodes = episodesSnapshot.docs.map(epDoc => ({
           id: epDoc.id,
           ...epDoc.data()
         }));
@@ -131,14 +131,14 @@ export default function Admin() {
     }
 
     try {
-      setItems((prev) => {
-        const item = prev.find((x) => x.id === id);
+      setItems(prev => {
+        const item = prev.find(x => x.id === id);
         if (item) {
           // Usando 'movies' para a coleção de filmes
           const col = item.collectionType === 'movies' ? 'movies' : 'series';
           deleteDoc(doc(db, col, id));
         }
-        return prev.filter((it) => it.id !== id);
+        return prev.filter(it => it.id !== id);
       });
       setSuccess('Item excluído com sucesso!');
       setTimeout(() => setSuccess(''), 3000);
@@ -179,7 +179,7 @@ export default function Admin() {
   }, []);
 
   const handleEdit = useCallback(
-    (item) => {
+    item => {
       setTitle(item.title || '');
       setDescription(item.description || '');
       setGenres(item.genres || []);
@@ -348,7 +348,7 @@ export default function Admin() {
 
     if (
       type === 'series' &&
-      (seasons.length === 0 || seasons.some((s) => !s.episodes || s.episodes.length === 0))
+      (seasons.length === 0 || seasons.some(s => !s.episodes || s.episodes.length === 0))
     ) {
       setError('Adicione pelo menos uma temporada e um episódio à série.');
       return;

@@ -52,7 +52,7 @@ export default function SeriesCard({ series: seriesProp, locked = false }) {
 
   // Função para alternar a série na lista de favoritos
   const toggleWatchlist = useCallback(
-    async (e) => {
+    async e => {
       e?.stopPropagation();
 
       if (!currentUser) {
@@ -187,7 +187,7 @@ export default function SeriesCard({ series: seriesProp, locked = false }) {
             </div>
 
             <button
-              onClick={(e) => {
+              onClick={e => {
                 e.stopPropagation();
                 toggleWatchlist(e);
               }}

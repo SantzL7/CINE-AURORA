@@ -24,7 +24,7 @@ export function useRowData({
           where('genres', 'array-contains', genreFilter)
         );
         const snapNew = await getDocs(qNew);
-        data = snapNew.docs.map((docSnap) => ({
+        data = snapNew.docs.map(docSnap => ({
           id: docSnap.id,
           type: collectionName,
           ...docSnap.data()
@@ -34,7 +34,7 @@ export function useRowData({
         if (data.length === 0) {
           const qOld = query(collection(db, collectionName), where('genre', '==', genreFilter));
           const snapOld = await getDocs(qOld);
-          data = snapOld.docs.map((docSnap) => ({
+          data = snapOld.docs.map(docSnap => ({
             id: docSnap.id,
             type: collectionName,
             ...docSnap.data()
@@ -44,7 +44,7 @@ export function useRowData({
         // Se não houver gênero específico, busca todos os itens (limitado a 10)
         const q = query(collection(db, collectionName), limit(10));
         const snapshot = await getDocs(q);
-        data = snapshot.docs.map((docSnap) => ({
+        data = snapshot.docs.map(docSnap => ({
           id: docSnap.id,
           type: collectionName,
           ...docSnap.data()
@@ -95,7 +95,7 @@ export function useRowData({
             const processedSeriesIds = new Set();
 
             // Processa filmes (progress)
-            progressSnap.docs.forEach((docSnap) => {
+            progressSnap.docs.forEach(docSnap => {
               const data = docSnap.data();
               allItems.push({
                 id: docSnap.id,
@@ -107,7 +107,7 @@ export function useRowData({
             });
 
             // Processa séries (watching)
-            watchingSnap.docs.forEach((docSnap) => {
+            watchingSnap.docs.forEach(docSnap => {
               const data = docSnap.data();
               const seriesId = data.seriesId || docSnap.id.split('-')[0];
               if (!seriesId) return;
@@ -124,7 +124,7 @@ export function useRowData({
             });
 
             // Adiciona as séries da lista de assistir do usuário
-            userWatchingList.forEach((series) => {
+            userWatchingList.forEach(series => {
               if (!series.seriesId) return;
               if (processedSeriesIds.has(series.seriesId)) return;
 
@@ -144,7 +144,7 @@ export function useRowData({
 
             // Filtra por tipo se especificado
             const filteredItems = type
-              ? allItems.filter((item) => {
+              ? allItems.filter(item => {
                   const normalizedType = item.type === 'movies' ? 'movie' : item.type;
                   const targetType = type === 'movies' ? 'movie' : type;
                   return normalizedType === targetType;
@@ -152,8 +152,8 @@ export function useRowData({
               : allItems;
 
             // Busca os detalhes de cada item
-            const itemPromises = filteredItems.map((item) => {
-              return new Promise(async (resolve) => {
+            const itemPromises = filteredItems.map(item => {
+              return new Promise(async resolve => {
                 try {
                   const isSeries = item.type === 'series';
                   const collectionName = isSeries ? 'series' : 'movies';

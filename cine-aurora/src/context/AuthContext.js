@@ -91,7 +91,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (user) => {
+    const unsub = onAuthStateChanged(auth, user => {
       setCurrentUser(user);
       setLoading(false);
     });
